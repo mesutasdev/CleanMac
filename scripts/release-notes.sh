@@ -22,6 +22,6 @@ Manuel kurulum: CleanMac'i kapat → \`${APP_NAME}.app\` dosyasını Application
 Apple Developer ID ile imzalanmış ve notarize edilmiştir.
 
 ### Bu sürümde
-- Sidebar altında sabit **CleanMac Hakkında** butonu
-- Hakkında destek satırlarında etiket–değer boşluğu düzeltildi
+- Sidebar **CleanMac Hakkında** butonu varsayılan pencere boyutunda görünür
+- IBAN tam genişlikte okunur, kopyalamak için ikon butonu
 EOF

@@ -56,20 +56,24 @@ struct AboutView: View {
                             supportLabel("Banka")
                             supportValue("EnPara")
                         }
-                        GridRow(alignment: .top) {
-                            supportLabel("IBAN")
-                            HStack(spacing: 8) {
-                                Text(iban)
-                                    .font(.system(.caption, design: .monospaced))
-                                    .textSelection(.enabled)
+                    }
 
-                                Button("Kopyala") {
-                                    copyToClipboard(iban.replacingOccurrences(of: " ", with: ""))
-                                }
-                                .buttonStyle(.borderless)
-                                .font(.caption)
-                                .controlSize(.small)
+                    VStack(alignment: .leading, spacing: 4) {
+                        supportLabel("IBAN")
+                        HStack(alignment: .top, spacing: 6) {
+                            Text(iban)
+                                .font(.system(.caption, design: .monospaced))
+                                .fixedSize(horizontal: false, vertical: true)
+                                .textSelection(.enabled)
+
+                            Button {
+                                copyToClipboard(iban.replacingOccurrences(of: " ", with: ""))
+                            } label: {
+                                Image(systemName: "doc.on.doc")
+                                    .font(.caption)
                             }
+                            .buttonStyle(.borderless)
+                            .help("IBAN'ı kopyala")
                         }
                     }
 
@@ -81,7 +85,7 @@ struct AboutView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(.quaternary.opacity(0.45), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
             }
-            .frame(maxWidth: 320)
+            .frame(maxWidth: .infinity)
 
             Button("Tamam") {
                 dismiss()
@@ -90,7 +94,7 @@ struct AboutView: View {
             .controlSize(.large)
         }
         .padding(32)
-        .frame(width: 380)
+        .frame(width: 400)
     }
 
     private func supportLabel(_ text: String) -> some View {

@@ -4,58 +4,60 @@ struct SidebarView: View {
     @ObservedObject var viewModel: CleanMacViewModel
 
     var body: some View {
-        List(selection: $viewModel.sidebarSelection) {
-            Section {
-                SidebarSummaryCard(
-                    permanentBytes: viewModel.permanentReclaimBytes,
-                    temporaryBytes: viewModel.temporaryReclaimBytes,
-                    isScanning: viewModel.isScanning
-                )
-                .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-            }
-
-            Section("Kategoriler") {
-                NavigationLink(value: SidebarSelection.overview) {
-                    SidebarCategoryLabel(
-                        title: "Genel Bakış",
-                        systemImage: "square.grid.2x2",
-                        byteTotal: viewModel.selectedTotalBytes,
-                        tint: .accentColor
+        VStack(spacing: 0) {
+            List(selection: $viewModel.sidebarSelection) {
+                Section {
+                    SidebarSummaryCard(
+                        permanentBytes: viewModel.permanentReclaimBytes,
+                        temporaryBytes: viewModel.temporaryReclaimBytes,
+                        isScanning: viewModel.isScanning
                     )
+                    .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
                 }
 
-                ForEach(viewModel.visibleCategories(), id: \.self) { category in
-                    NavigationLink(value: SidebarSelection.category(category)) {
+                Section("Kategoriler") {
+                    NavigationLink(value: SidebarSelection.overview) {
                         SidebarCategoryLabel(
-                            title: category.sidebarTitle,
-                            systemImage: category.systemImage,
-                            byteTotal: viewModel.totalBytes(in: category),
-                            tint: tint(for: category)
+                            title: "Genel Bakış",
+                            systemImage: "square.grid.2x2",
+                            byteTotal: viewModel.selectedTotalBytes,
+                            tint: .accentColor
                         )
+                    }
+
+                    ForEach(viewModel.visibleCategories(), id: \.self) { category in
+                        NavigationLink(value: SidebarSelection.category(category)) {
+                            SidebarCategoryLabel(
+                                title: category.sidebarTitle,
+                                systemImage: category.systemImage,
+                                byteTotal: viewModel.totalBytes(in: category),
+                                tint: tint(for: category)
+                            )
+                        }
                     }
                 }
             }
-        }
-        .listStyle(.sidebar)
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            VStack(spacing: 0) {
-                Divider()
-                Button {
-                    viewModel.presentAbout()
-                } label: {
-                    Label("CleanMac Hakkında", systemImage: "info.circle")
-                        .font(.subheadline)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+            .listStyle(.sidebar)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            Divider()
+
+            Button {
+                viewModel.presentAbout()
+            } label: {
+                Label("CleanMac Hakkında", systemImage: "info.circle")
+                    .font(.subheadline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
             .background(.bar)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .navigationTitle("CleanMac")
     }
 
@@ -76,8 +78,8 @@ private struct SidebarSummaryCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .center, spacing: 14) {
-                BrandLogoView(size: 64, cornerRadius: 16)
+            HStack(alignment: .center, spacing: 12) {
+                BrandLogoView(size: 52, cornerRadius: 14)
 
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Seçili Alan")
@@ -112,7 +114,7 @@ private struct SidebarSummaryCard: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
+        .padding(14)
         .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }
