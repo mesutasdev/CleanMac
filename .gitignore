@@ -1,0 +1,11 @@
+.DS_Store
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Sertifika private key'leri asla commit'lenmemeli
+*.p12
+build/certs/*.key
+build/certs/*.csr
