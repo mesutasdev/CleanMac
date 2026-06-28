@@ -4,6 +4,8 @@
 
 VERSION="${1:?Sürüm gerekli, örn: 1.0.13}"
 APP_NAME="CleanMac"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+SUPPORT_SECTION="$(cat "$ROOT/scripts/support-section.md")"
 
 cat <<EOF
 ## ${APP_NAME} ${VERSION}
@@ -31,8 +33,5 @@ Apple Developer ID ile imzalanmış ve notarize edilmiştir.
 
 ### Destek
 
-CleanMac ücretsiz ve açık kaynaklıdır. Beğendiysen geliştirmeye destek olabilirsin — zorunlu değil, minnet duyarım.
-
-- [Buy Me a Coffee](https://buymeacoffee.com/mesutasdevw)
-- **EnPara** — Hesap Sahibi: Mesut As · IBAN: \`TR51 0015 7000 0000 0088 1408 69\` · Açıklama: *CleanMac destek* (veya istediğiniz bir not)
+${SUPPORT_SECTION}
 EOF
