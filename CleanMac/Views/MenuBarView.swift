@@ -25,8 +25,7 @@ struct MenuBarView: View {
         Divider()
 
         Button("CleanMac Hakkında") {
-            MainWindowController.show()
-            viewModel.showAbout = true
+            viewModel.presentAbout()
         }
 
         Divider()

@@ -81,6 +81,15 @@ final class CleanMacViewModel: ObservableObject {
         diskSpace = DiskSpaceService.current()
     }
 
+    func presentAbout() {
+        guard !showAbout else {
+            MainWindowController.show()
+            return
+        }
+        MainWindowController.show()
+        showAbout = true
+    }
+
     func scan() async {
         guard !isScanning else { return }
         isScanning = true

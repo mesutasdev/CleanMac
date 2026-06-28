@@ -13,7 +13,7 @@ struct CleanMacApp: App {
         }
         .menuBarExtraStyle(.menu)
 
-        WindowGroup("CleanMac", id: "main") {
+        Window("CleanMac", id: "main") {
             ContentView(viewModel: viewModel)
                 .background {
                     MainWindowConfigurator()
@@ -26,7 +26,7 @@ struct CleanMacApp: App {
 
             CommandGroup(replacing: .appInfo) {
                 Button("CleanMac Hakkında") {
-                    viewModel.showAbout = true
+                    viewModel.presentAbout()
                 }
             }
 

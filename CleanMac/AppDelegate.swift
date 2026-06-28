@@ -53,6 +53,13 @@ enum MainWindowController {
     static func show() {
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
+
+        if let window = preferredMainWindow {
+            bringToFront(window)
+            closeDuplicateMainWindows(keeping: window)
+            return
+        }
+
         openHandler?()
         presentMainWindow(retry: 0)
     }
@@ -62,24 +69,43 @@ enum MainWindowController {
     }
 
     static var mainWindow: NSWindow? {
-        NSApp.windows.first { window in
-            window.identifier?.rawValue == mainWindowIdentifier
-                || window.title == "CleanMac"
+        preferredMainWindow
+    }
+
+    private static var preferredMainWindow: NSWindow? {
+        mainWindows.first
+    }
+
+    private static var mainWindows: [NSWindow] {
+        NSApp.windows.filter(isMainWindow)
+    }
+
+    private static func isMainWindow(_ window: NSWindow) -> Bool {
+        window.identifier?.rawValue == mainWindowIdentifier || window.title == "CleanMac"
+    }
+
+    private static func bringToFront(_ window: NSWindow) {
+        window.identifier = NSUserInterfaceItemIdentifier(mainWindowIdentifier)
+        window.isReleasedWhenClosed = false
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    private static func closeDuplicateMainWindows(keeping keep: NSWindow) {
+        for window in mainWindows where window !== keep {
+            window.close()
         }
     }
 
     private static func presentMainWindow(retry: Int) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-            if let window = mainWindow {
-                window.identifier = NSUserInterfaceItemIdentifier(mainWindowIdentifier)
-                window.isReleasedWhenClosed = false
-                window.makeKeyAndOrderFront(nil)
-                NSApp.activate(ignoringOtherApps: true)
+            if let window = preferredMainWindow {
+                bringToFront(window)
+                closeDuplicateMainWindows(keeping: window)
                 return
             }
 
-            guard retry < 12 else { return }
-            openHandler?()
+            guard retry < 24 else { return }
             presentMainWindow(retry: retry + 1)
         }
     }
