@@ -4,9 +4,15 @@ Xcode ve Flutter geliştiricileri için macOS disk temizleyici. DerivedData, sim
 
 Apple **Developer ID** ile imzalanmış ve **notarize** edilmiştir — ek kurulum adımı gerekmez.
 
-## İndir
+> **Uygulamayı kullanmak mı istiyorsun?**  
+> Yeşil **Code** butonundan indirdiğin kaynak koddur (Xcode projesi).  
+> Hazır uygulama için aşağıdaki **DMG** linkini kullan — repo'yu derlemene gerek yok.
 
-**[Releases](https://github.com/mesutasdev/CleanMac/releases)** sayfasından en son `CleanMac-x.x.dmg` dosyasını indirin.
+## İndir (DMG)
+
+[![Download CleanMac 1.0](https://img.shields.io/badge/Download-CleanMac%201.0-blue?style=for-the-badge)](https://github.com/mesutasdev/CleanMac/releases/download/v1.0/CleanMac-1.0.dmg)
+
+veya **[Releases](https://github.com/mesutasdev/CleanMac/releases/latest)** sayfasından `CleanMac-1.0.dmg` dosyasını indirin.
 
 | Gereksinim | Değer |
 |---|---|
@@ -68,4 +74,4 @@ Bu proje açık kaynak olarak paylaşılmaktadır. Katkılarınızı bekliyoruz.
 
 ## Yazar
 
-**Mesut Aş** — [LinkedIn](https://www.linkedin.com/in/mesutasdev)
+**Mesut As** — [LinkedIn](https://www.linkedin.com/in/mesutasdev)
