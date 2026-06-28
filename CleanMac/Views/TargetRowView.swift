@@ -67,7 +67,7 @@ struct TargetRowView: View {
 
                     if target.sizeBytes > 0 {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Silersen ne olur?")
+                            Text(L("target.deletion_impact_title"))
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(.secondary)
 
@@ -133,7 +133,7 @@ private struct LocationPathsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Konum")
+            Text(L("target.location"))
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
 
@@ -152,13 +152,13 @@ private struct LocationPathsView: View {
                                 .font(.caption2)
                         }
                         .buttonStyle(.borderless)
-                        .help("Finder'da göster")
+                        .help(L("target.show_in_finder"))
                     }
                 }
             }
 
             if hiddenCount > 0 {
-                Text("+\(hiddenCount) konum daha")
+                Text(L("target.more_locations", hiddenCount))
                     .font(.caption)
                     .foregroundStyle(.tertiary)
             }

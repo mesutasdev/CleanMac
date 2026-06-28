@@ -7,10 +7,10 @@ struct DetailView: View {
         VStack(spacing: 0) {
             SelectionActionsBar(
                 selectedBytes: viewModel.selectedTotalBytes,
+                isRecommendedSelectionActive: viewModel.isRecommendedSelectionActive,
                 isSelectionDisabled: viewModel.isCleaning || (viewModel.isScanning && !viewModel.hasScanned),
                 isCleanDisabled: viewModel.isCleaning || viewModel.isScanning || viewModel.selectedTotalBytes == 0,
-                onSelectRecommended: { viewModel.selectRecommended() },
-                onDeselectAll: { viewModel.selectAll(false) },
+                onToggleRecommended: { viewModel.toggleRecommendedSelection() },
                 onClean: { viewModel.requestClean() }
             )
             .opacity(viewModel.isScanning && !viewModel.hasScanned ? 0.55 : 1)
@@ -27,7 +27,7 @@ struct DetailView: View {
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                 } header: {
-                    Text("Disk Alanı")
+                    Text(L("detail.disk_space"))
                 }
             }
 
@@ -37,9 +37,9 @@ struct DetailView: View {
                         ProgressView()
                             .controlSize(.regular)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Önbellekler taranıyor…")
+                            Text(L("detail.scanning_title"))
                                 .font(.body)
-                            Text("Disk alanı hazır — temizlenebilir dosyalar hesaplanıyor")
+                            Text(L("detail.scanning_subtitle"))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -75,11 +75,11 @@ struct DetailView: View {
                         Button {
                             viewModel.showRegeneratingCaches = true
                         } label: {
-                            Label("Gelişmiş Önbellekleri Göster", systemImage: "gearshape")
+                            Label(L("detail.show_advanced_caches"), systemImage: "gearshape")
                         }
 
                         SectionCaptionRow(
-                            text: "Gradle, npm ve pub cache gibi bir sonraki build'de geri gelen önbellekler."
+                            text: L("detail.advanced_caches_footer")
                         )
                     }
                 }
@@ -106,9 +106,10 @@ struct DetailView: View {
             Button {
                 Task { await viewModel.scan() }
             } label: {
-                Label("Yeniden Tara", systemImage: "arrow.clockwise")
+                Label(L("menu.refresh"), systemImage: "arrow.clockwise")
             }
-            .help("Önbellek boyutlarını yeniden hesapla (⌘R)")
+            .labelStyle(.titleAndIcon)
+            .help(L("detail.refresh_help"))
             .disabled(viewModel.isScanning || viewModel.isCleaning)
         }
     }
@@ -116,21 +117,22 @@ struct DetailView: View {
 
 private struct SelectionActionsBar: View {
     let selectedBytes: Int64
+    let isRecommendedSelectionActive: Bool
     let isSelectionDisabled: Bool
     let isCleanDisabled: Bool
-    let onSelectRecommended: () -> Void
-    let onDeselectAll: () -> Void
+    let onToggleRecommended: () -> Void
     let onClean: () -> Void
 
     var body: some View {
         HStack(spacing: 10) {
-            Button("Önerilenleri Seç", action: onSelectRecommended)
-                .buttonStyle(.bordered)
-                .disabled(isSelectionDisabled)
-
-            Button("Seçimi Kaldır", action: onDeselectAll)
-                .buttonStyle(.bordered)
-                .disabled(isSelectionDisabled)
+            Button(action: onToggleRecommended) {
+                Label(
+                    isRecommendedSelectionActive ? L("detail.deselect_recommended") : L("detail.select_recommended"),
+                    systemImage: isRecommendedSelectionActive ? "checkmark.circle.fill" : "checkmark.circle"
+                )
+            }
+            .buttonStyle(.bordered)
+            .disabled(isSelectionDisabled)
 
             Spacer(minLength: 12)
 
@@ -140,7 +142,7 @@ private struct SelectionActionsBar: View {
             .buttonStyle(.borderedProminent)
             .tint(.green)
             .disabled(isCleanDisabled)
-            .help("Seçili dosyaları sil ve disk alanı aç (⌘⇧⌫)")
+            .help(L("detail.free_space_help"))
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -151,9 +153,9 @@ private struct SelectionActionsBar: View {
 
     private var cleanButtonTitle: String {
         if selectedBytes > 0 {
-            return "Yer Aç · \(ByteCountFormatter.string(from: selectedBytes))"
+            return "\(L("detail.free_space")) · \(ByteCountFormatter.string(from: selectedBytes))"
         }
-        return "Yer Aç"
+        return L("detail.free_space")
     }
 }
 
@@ -198,17 +200,17 @@ private struct StatusBarView: View {
             } else if lastFreedBytes > 0 {
                 Image(systemName: "sparkles")
                     .foregroundStyle(.secondary)
-                Text("Son temizlik: \(ByteCountFormatter.string(from: lastFreedBytes))")
+                Text(L("detail.last_clean", ByteCountFormatter.string(from: lastFreedBytes)))
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             } else if hasActiveSelection {
-                Text("Seçili öğeler temizlenmeye hazır")
+                Text(L("detail.status_ready"))
                     .font(.callout)
                     .foregroundStyle(.tertiary)
                     .fixedSize(horizontal: false, vertical: true)
             } else {
-                Text("Önerilenleri Seç ile başlayabilirsin")
+                Text(L("detail.status_hint"))
                     .font(.callout)
                     .foregroundStyle(.tertiary)
                     .fixedSize(horizontal: false, vertical: true)

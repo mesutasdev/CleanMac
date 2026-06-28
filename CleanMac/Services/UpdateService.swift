@@ -12,17 +12,17 @@ enum UpdateError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidResponse:
-            return "Güncelleme bilgisi alınamadı."
+            return L("update.error.invalid_response")
         case .missingVersion:
-            return "Sürüm numarası okunamadı."
+            return L("update.error.missing_version")
         case .missingDownload:
-            return "İndirilebilir DMG bulunamadı."
+            return L("update.error.missing_download")
         case .downloadFailed:
-            return "Güncelleme indirilemedi."
+            return L("update.error.download_failed")
         case .mountFailed:
-            return "DMG dosyası açılamadı."
+            return L("update.error.mount_failed")
         case .missingInstaller:
-            return "Kurulum dosyası DMG içinde bulunamadı."
+            return L("update.error.missing_installer")
         }
     }
 }
@@ -76,7 +76,7 @@ actor UpdateService {
         from downloadURL: URL,
         progress: @escaping @Sendable (String) -> Void
     ) async throws {
-        progress("Güncelleme indiriliyor…")
+        progress(L("update.downloading"))
 
         let downloadDirectory = FileManager.default.temporaryDirectory
             .appendingPathComponent("CleanMac-Update", isDirectory: true)
@@ -92,7 +92,7 @@ actor UpdateService {
 
         try FileManager.default.moveItem(at: temporaryFile, to: destination)
 
-        progress("Kurulum hazırlanıyor…")
+        progress(L("update.preparing"))
         let mountPoint = try mountImage(at: destination)
 
         let installerURL = mountPoint.appendingPathComponent(installerAppName, isDirectory: true)
@@ -102,14 +102,14 @@ actor UpdateService {
         if FileManager.default.fileExists(atPath: installerURL.path) {
             launchURL = installerURL
         } else if FileManager.default.fileExists(atPath: appURL.path) {
-            progress("Uygulama kopyalanıyor…")
+            progress(L("update.copying"))
             try await installApplication(from: appURL)
             return
         } else {
             throw UpdateError.missingInstaller
         }
 
-        progress("Kuruluyor…")
+        progress(L("update.installing"))
         let opened = await MainActor.run {
             NSWorkspace.shared.open(launchURL)
         }

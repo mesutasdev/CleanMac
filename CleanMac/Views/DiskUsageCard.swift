@@ -8,11 +8,11 @@ struct DiskUsageCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Label(diskSpace?.volumeName ?? "Disk", systemImage: "internaldrive")
+                Label(diskSpace?.volumeName ?? L("disk.title"), systemImage: "internaldrive")
                     .font(.headline)
                 Spacer()
                 if let diskSpace {
-                    Text("\(usedPercent(diskSpace))% dolu")
+                    Text(L("disk.full_percent", usedPercent(diskSpace)))
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(progressTint(for: diskSpace))
                 }
@@ -23,7 +23,7 @@ struct DiskUsageCard: View {
                     Text(ByteCountFormatter.string(from: diskSpace.freeBytes))
                         .font(.system(size: 34, weight: .bold, design: .rounded))
                         .monospacedDigit()
-                    Text("boş")
+                    Text(L("disk.free_label"))
                         .font(.title3.weight(.semibold))
                         .foregroundStyle(.secondary)
                 }
@@ -33,15 +33,15 @@ struct DiskUsageCard: View {
 
                 HStack(spacing: 16) {
                     diskStat(
-                        title: "Toplam",
+                        title: L("disk.total"),
                         value: ByteCountFormatter.string(from: diskSpace.totalBytes)
                     )
                     diskStat(
-                        title: "Kullanılan",
+                        title: L("disk.used"),
                         value: ByteCountFormatter.string(from: diskSpace.usedBytes)
                     )
                     diskStat(
-                        title: "Kalan",
+                        title: L("disk.remaining"),
                         value: ByteCountFormatter.string(from: diskSpace.freeBytes),
                         emphasized: true
                     )
@@ -60,7 +60,7 @@ struct DiskUsageCard: View {
                     .foregroundStyle(.green)
                 }
             } else {
-                Text("Disk bilgisi alınamadı")
+                Text(L("disk.unavailable"))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -97,18 +97,8 @@ struct DiskUsageCard: View {
         let projected = ByteCountFormatter.string(from: disk.projectedFree(afterReclaiming: selectedBytes))
         if permanentBytes > 0, selectedBytes > permanentBytes {
             let permanent = ByteCountFormatter.string(from: disk.projectedFree(afterReclaiming: permanentBytes))
-            return "Temizlik sonrası ~\(projected) boş alan (kalıcı: ~\(permanent))"
+            return L("disk.projection.both", projected, permanent)
         }
-        return "Temizlik sonrası ~\(projected) boş alan"
+        return L("disk.projection.single", projected)
     }
-}
-
-#Preview {
-    DiskUsageCard(
-        diskSpace: DiskSpaceInfo(volumeName: "Macintosh HD", totalBytes: 250_000_000_000, freeBytes: 12_000_000_000),
-        selectedBytes: 16_000_000_000,
-        permanentBytes: 12_000_000_000
-    )
-    .padding()
-    .frame(width: 520)
 }

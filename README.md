@@ -31,7 +31,7 @@ Manuel: CleanMac'i kapatın → `CleanMac.app` → Applications → açın
 
 ### Önerilen temizlik
 - **Eski DerivedData** — artık derlemediğin projelerin build çıktıları (son build korunur)
-- **Eski Flutter Build** — `Developer/projects` altındaki eski Flutter build klasörleri
+- **Eski Flutter Build** — yaygın proje klasörlerinde (`~/Developer/projects`, `~/projects`, `~/dev`, `~/code` vb.) otomatik bulunan eski Flutter `build` / `.dart_tool` klasörleri
 - **Kullanılmayan Simülatörler** — güncelleme sonrası kullanılamayan runtime'lar
 - **Eski iOS Device Support** — eski cihaz sembolleri (güncel cihaz korunur)
 

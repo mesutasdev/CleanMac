@@ -19,6 +19,7 @@ final class CleanMacViewModel: ObservableObject {
     @Published var sidebarSelection: SidebarSelection = .overview
     @Published var showAbout = false
     @Published var diskSpace: DiskSpaceInfo? = DiskSpaceService.current()
+    private var shouldAutoClearStatus = false
 
     var selectedTotalBytes: Int64 {
         targets.filter(\.isSelected).reduce(0) { $0 + $1.sizeBytes }
@@ -57,6 +58,16 @@ final class CleanMacViewModel: ObservableObject {
         targets.contains { $0.category == .regenerating && $0.isSelected && $0.sizeBytes > 0 }
     }
 
+    var isRecommendedSelectionActive: Bool {
+        let hasRecommended = targets.contains { $0.category == .reclaimable && $0.sizeBytes > 0 }
+        guard hasRecommended else { return false }
+
+        return targets.allSatisfy { target in
+            let shouldSelect = target.category == .reclaimable && target.sizeBytes > 0
+            return target.isSelected == shouldSelect
+        }
+    }
+
     func targets(in category: CleanTargetCategory) -> [CleanTarget] {
         targets.filter { $0.category == category }
     }
@@ -88,7 +99,7 @@ final class CleanMacViewModel: ObservableObject {
 
     var detailTitle: String {
         switch sidebarSelection {
-        case .overview: return "Genel Bakış"
+        case .overview: return L("sidebar.overview")
         case .category(let category): return category.sidebarTitle
         }
     }
@@ -109,7 +120,7 @@ final class CleanMacViewModel: ObservableObject {
     func scan(options: ScanOptions = ScanOptions()) async {
         guard !isScanning else { return }
         isScanning = true
-        statusMessage = "Önbellekler taranıyor..."
+        statusMessage = L("scan.scanning_status")
         if options.resetLastFreed {
             lastFreedBytes = 0
         }
@@ -186,6 +197,14 @@ final class CleanMacViewModel: ObservableObject {
         }
     }
 
+    func toggleRecommendedSelection() {
+        if isRecommendedSelectionActive {
+            selectAll(false)
+        } else {
+            selectRecommended()
+        }
+    }
+
     func selectAll(_ selected: Bool) {
         targets = targets.map { target in
             var updated = target
@@ -214,7 +233,8 @@ final class CleanMacViewModel: ObservableObject {
         guard !isCleaning else { return }
 
         isCleaning = true
-        statusMessage = "Temizleniyor..."
+        shouldAutoClearStatus = false
+        statusMessage = L("scan.cleaning_status")
 
         let hadRegenerating = includesRegeneratingSelection
         let toClean = targets.filter { $0.isSelected && $0.sizeBytes > 0 }
@@ -229,13 +249,13 @@ final class CleanMacViewModel: ObservableObject {
         let completionMessage: String
         if failed.isEmpty {
             if hadRegenerating {
-                completionMessage = "\(ByteCountFormatter.string(from: freed)) açıldı — bir kısmı bir sonraki build'de geri gelebilir"
+                completionMessage = L("scan.freed.regenerating", ByteCountFormatter.string(from: freed))
             } else {
-                completionMessage = "\(ByteCountFormatter.string(from: freed)) kalıcı olarak açıldı"
+                completionMessage = L("scan.freed.permanent", ByteCountFormatter.string(from: freed))
             }
         } else {
             let names = failed.map(\.kind.title).joined(separator: ", ")
-            completionMessage = "\(ByteCountFormatter.string(from: freed)) açıldı — hata: \(names)"
+            completionMessage = L("scan.freed.partial_error", ByteCountFormatter.string(from: freed), names)
         }
 
         if !partial.isEmpty, failed.isEmpty {
@@ -244,15 +264,15 @@ final class CleanMacViewModel: ObservableObject {
         } else {
             statusMessage = completionMessage
         }
+        shouldAutoClearStatus = true
 
         await scan(options: ScanOptions(clearStatusMessage: false, resetLastFreed: false, autoSelectRecommended: true))
         isCleaning = false
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 6) { [weak self] in
-            guard let message = self?.statusMessage else { return }
-            if message.contains("açıldı") {
-                self?.statusMessage = nil
-            }
+            guard let self, self.shouldAutoClearStatus else { return }
+            self.statusMessage = nil
+            self.shouldAutoClearStatus = false
         }
     }
 }

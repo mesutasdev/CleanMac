@@ -1,34 +1,26 @@
 import Foundation
 
 enum CleanTargetCategory: Int, CaseIterable, Hashable, Sendable {
-    /// Silinince kalıcı yer açar; bir sonraki build'de otomatik geri gelmez.
     case reclaimable
-    /// Gerçek yer açar ama o dosyaya ihtiyacın olabilir.
     case conditional
-    /// Bilinçli müdahale — aktif projenin build'i.
     case destructive
-    /// Bir sonraki build/install ile disk yeniden dolar; rutin temizlik için uygun değil.
     case regenerating
 
     var sectionTitle: String {
         switch self {
-        case .reclaimable: return "Önerilen — kalıcı yer açar"
-        case .conditional: return "İsteğe bağlı — geri gelmez ama lazım olabilir"
-        case .destructive: return "Aktif proje"
-        case .regenerating: return "Genelde silme — bir sonraki build'de geri gelir"
+        case .reclaimable: return L("category.reclaimable.title")
+        case .conditional: return L("category.conditional.title")
+        case .destructive: return L("category.destructive.title")
+        case .regenerating: return L("category.regenerating.title")
         }
     }
 
     var sectionFooter: String {
         switch self {
-        case .reclaimable:
-            return "Eski build ve kullanılmayan dosyalar. Silince disk gerçekten boşalır; sadece o projeyi tekrar derlersen dolmaya başlar."
-        case .conditional:
-            return "Xcode arşivleri ve simülatör cache/log dosyaları. Gerekirse yeniden oluşturman gerekebilir."
-        case .destructive:
-            return "Yalnızca kasıtlı sıfırlama için. Son build ve güncel cihaz sembolleri varsayılan olarak korunur."
-        case .regenerating:
-            return "Gradle, npm, pub cache gibi önbellekler. Silmek diski geçici boşaltır; bir sonraki build'de aynı dosyalar yeniden iner."
+        case .reclaimable: return L("category.reclaimable.footer")
+        case .conditional: return L("category.conditional.footer")
+        case .destructive: return L("category.destructive.footer")
+        case .regenerating: return L("category.regenerating.footer")
         }
     }
 
@@ -36,10 +28,10 @@ enum CleanTargetCategory: Int, CaseIterable, Hashable, Sendable {
 
     var sidebarTitle: String {
         switch self {
-        case .reclaimable: return "Önerilen"
-        case .conditional: return "İsteğe Bağlı"
-        case .destructive: return "Aktif Proje"
-        case .regenerating: return "Gelişmiş"
+        case .reclaimable: return L("category.reclaimable.sidebar")
+        case .conditional: return L("category.conditional.sidebar")
+        case .destructive: return L("category.destructive.sidebar")
+        case .regenerating: return L("category.regenerating.sidebar")
         }
     }
 

@@ -25,7 +25,7 @@ final class UpdateManager: ObservableObject {
             if latest.version <= current {
                 availableUpdate = nil
                 if force {
-                    manualCheckMessage = "En güncel sürümü kullanıyorsunuz (\(current.displayString))."
+                    manualCheckMessage = L("update.latest", current.displayString)
                     showManualCheckAlert = true
                 }
                 return
@@ -64,7 +64,7 @@ final class UpdateManager: ObservableObject {
 
         isUpdating = true
         showUpdateAlert = false
-        updateStatus = "Güncelleme indiriliyor…"
+        updateStatus = L("update.downloading")
 
         do {
             try await UpdateService.shared.downloadAndInstall(from: update.downloadURL) { [weak self] status in

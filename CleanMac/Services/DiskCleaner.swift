@@ -33,7 +33,7 @@ enum DiskCleaner {
                 } else if let path = target.kind.resolvePath(home: home) {
                     result = cleanDirectory(target: target, path: path)
                 } else {
-                    result = CleanResult(kind: target.kind, freedBytes: 0, success: false, message: "Yol bulunamadı")
+                    result = CleanResult(kind: target.kind, freedBytes: 0, success: false, message: L("clean.error.path_not_found"))
                 }
             }
             results.append(result)
@@ -65,8 +65,7 @@ enum DiskCleaner {
     }
 
     private static func cleanStaleFlutterBuilds(target: CleanTarget, home: URL) -> CleanResult {
-        let projectsRoot = FlutterBuildHelper.projectsRootURL(home: home)
-        let staleFolders = FlutterBuildHelper.staleArtifactFolders(in: projectsRoot)
+        let staleFolders = FlutterBuildHelper.staleArtifactFolders(home: home)
 
         guard !staleFolders.isEmpty else {
             return CleanResult(kind: target.kind, freedBytes: 0, success: true, message: nil)
@@ -76,8 +75,7 @@ enum DiskCleaner {
     }
 
     private static func cleanLatestFlutterBuilds(target: CleanTarget, home: URL) -> CleanResult {
-        let projectsRoot = FlutterBuildHelper.projectsRootURL(home: home)
-        let latestFolders = FlutterBuildHelper.latestArtifactFolders(in: projectsRoot)
+        let latestFolders = FlutterBuildHelper.latestArtifactFolders(home: home)
 
         guard !latestFolders.isEmpty else {
             return CleanResult(kind: target.kind, freedBytes: 0, success: true, message: nil)
@@ -132,7 +130,7 @@ enum DiskCleaner {
                 kind: target.kind,
                 freedBytes: 0,
                 success: false,
-                message: lastError ?? "Silinemedi"
+                message: lastError ?? L("clean.error.delete_failed")
             )
         }
 
@@ -141,7 +139,7 @@ enum DiskCleaner {
                 kind: target.kind,
                 freedBytes: freedBytes,
                 success: true,
-                message: "\(failedCount) klasör silinemedi"
+                message: L("clean.error.folders_failed", failedCount)
             )
         }
 
@@ -179,7 +177,7 @@ enum DiskCleaner {
 
     private static func cleanWithShell(_ target: CleanTarget) async -> CleanResult {
         guard target.kind == .simulatorUnavailable else {
-            return CleanResult(kind: target.kind, freedBytes: 0, success: false, message: "Desteklenmiyor")
+            return CleanResult(kind: target.kind, freedBytes: 0, success: false, message: L("clean.error.unsupported"))
         }
 
         let process = Process()

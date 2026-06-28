@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SidebarView: View {
     @ObservedObject var viewModel: CleanMacViewModel
+    @ObservedObject var languageManager: LanguageManager
 
     var body: some View {
         VStack(spacing: 0) {
@@ -15,10 +16,10 @@ struct SidebarView: View {
             .padding(.bottom, 4)
 
             List(selection: $viewModel.sidebarSelection) {
-                Section("Kategoriler") {
+                Section(L("sidebar.categories")) {
                     NavigationLink(value: SidebarSelection.overview) {
                         SidebarCategoryLabel(
-                            title: "Genel Bakış",
+                            title: L("sidebar.overview"),
                             systemImage: "square.grid.2x2",
                             byteTotal: viewModel.selectedTotalBytes,
                             tint: .accentColor
@@ -42,10 +43,17 @@ struct SidebarView: View {
 
             Divider()
 
+            LanguageToggleView(languageManager: languageManager)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .background(.bar)
+
+            Divider()
+
             Button {
                 viewModel.presentAbout()
             } label: {
-                Label("CleanMac Hakkında", systemImage: "info.circle")
+                Label(L("menu.about"), systemImage: "info.circle")
                     .font(.subheadline)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .contentShape(Rectangle())
@@ -56,7 +64,7 @@ struct SidebarView: View {
             .background(.bar)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .navigationTitle("CleanMac")
+        .navigationTitle(L("app.name"))
     }
 
     private func tint(for category: CleanTargetCategory) -> Color {
@@ -83,7 +91,7 @@ private struct SidebarSummaryCard: View {
                 BrandLogoView(size: 44, cornerRadius: 12)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Seçili Alan")
+                    Text(L("sidebar.selected_space"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
@@ -110,10 +118,10 @@ private struct SidebarSummaryCard: View {
 
             Group {
                 if isScanning {
-                    Text("Taranıyor…")
+                    Text(L("sidebar.scanning"))
                 } else if temporaryBytes > 0 {
                     Label {
-                        Text("\(ByteCountFormatter.string(from: temporaryBytes)) geçici")
+                        Text("\(ByteCountFormatter.string(from: temporaryBytes)) \(L("sidebar.temporary_suffix"))")
                             .lineLimit(1)
                     } icon: {
                         Image(systemName: "arrow.triangle.2.circlepath")
@@ -121,7 +129,7 @@ private struct SidebarSummaryCard: View {
                     }
                     .foregroundStyle(.orange)
                 } else {
-                    Text("Kalıcı disk tasarrufu")
+                    Text(L("sidebar.permanent_savings"))
                         .foregroundStyle(.secondary)
                 }
             }

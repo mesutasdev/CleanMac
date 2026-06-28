@@ -3,11 +3,12 @@ import SwiftUI
 struct ContentView: View {
     @ObservedObject var viewModel: CleanMacViewModel
     @ObservedObject var updateManager: UpdateManager
+    @ObservedObject var languageManager: LanguageManager
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
 
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
-            SidebarView(viewModel: viewModel)
+            SidebarView(viewModel: viewModel, languageManager: languageManager)
                 .navigationSplitViewColumnWidth(min: 240, ideal: 270, max: 320)
         } detail: {
             DetailView(viewModel: viewModel)
@@ -20,6 +21,10 @@ struct ContentView: View {
         .task {
             await updateManager.checkForUpdates()
             await viewModel.scan()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .cleanMacToggleRecommended)) { _ in
+            MainWindowController.show()
+            viewModel.toggleRecommendedSelection()
         }
         .onReceive(NotificationCenter.default.publisher(for: .cleanMacSelectRecommended)) { _ in
             MainWindowController.show()
@@ -36,31 +41,32 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .cleanMacClean)) { _ in
             viewModel.requestClean()
         }
-        .alert("Seçili dosyalar silinsin mi?", isPresented: $viewModel.showCleanConfirmation) {
-            Button("İptal", role: .cancel) {}
-            Button("Temizle", role: .destructive) {
+        .alert(L("alert.clean_title"), isPresented: $viewModel.showCleanConfirmation) {
+            Button(L("alert.cancel"), role: .cancel) {}
+            Button(L("alert.clean"), role: .destructive) {
                 Task { await viewModel.cleanConfirmed() }
             }
         } message: {
             Text(confirmationMessage)
         }
         .sheet(isPresented: $viewModel.showAbout) {
-            AboutView(updateManager: updateManager)
+            AboutView(updateManager: updateManager, languageManager: languageManager)
         }
     }
 
     private var confirmationMessage: String {
         let total = ByteCountFormatter.string(from: viewModel.selectedTotalBytes)
+        let permanent = ByteCountFormatter.string(from: viewModel.permanentReclaimBytes)
         if viewModel.includesRegeneratingSelection {
-            return "\(total) silinecek. Bir kısmı bir sonraki build'de geri gelebilir. Kalıcı alan: \(ByteCountFormatter.string(from: viewModel.permanentReclaimBytes))."
+            return L("alert.confirm.regenerating", total, permanent)
         }
         if viewModel.includesDestructiveDeletion {
-            return "\(total) silinecek. Son build veya güncel cihaz sembolleri de dahil."
+            return L("alert.confirm.destructive", total)
         }
-        return "\(total) kalıcı olarak silinecek. Son Xcode/Flutter build ve güncel iOS sembolleri korunur."
+        return L("alert.confirm.default", total)
     }
 }
 
 #Preview {
-    ContentView(viewModel: CleanMacViewModel(), updateManager: UpdateManager())
+    ContentView(viewModel: CleanMacViewModel(), updateManager: UpdateManager(), languageManager: LanguageManager.shared)
 }

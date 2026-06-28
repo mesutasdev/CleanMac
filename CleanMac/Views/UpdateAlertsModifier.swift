@@ -5,21 +5,21 @@ struct UpdateAlertsModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .alert("Yeni sürüm mevcut", isPresented: $updateManager.showUpdateAlert) {
-                Button("Sonra", role: .cancel) {
+            .alert(L("update.available_title"), isPresented: $updateManager.showUpdateAlert) {
+                Button(L("update.later"), role: .cancel) {
                     updateManager.skipUpdate()
                 }
-                Button("Güncelle") {
+                Button(L("update.install")) {
                     Task { await updateManager.installUpdate() }
                 }
             } message: {
                 if let update = updateManager.availableUpdate {
                     let current = AppVersion.current?.displayString ?? "?"
-                    Text("CleanMac \(update.versionLabel) yayınlandı. Şu an \(current) kullanıyorsunuz.")
+                    Text(L("update.message", update.versionLabel, current))
                 }
             }
-            .alert("Güncelleme", isPresented: $updateManager.showManualCheckAlert) {
-                Button("Tamam", role: .cancel) {}
+            .alert(L("update.title"), isPresented: $updateManager.showManualCheckAlert) {
+                Button(L("about.ok"), role: .cancel) {}
             } message: {
                 Text(updateManager.manualCheckMessage ?? "")
             }
@@ -37,10 +37,10 @@ struct UpdateProgressView: View {
             ProgressView()
                 .controlSize(.large)
 
-            Text("CleanMac güncelleniyor")
+            Text(L("update.progress_title"))
                 .font(.headline)
 
-            Text(updateManager.updateStatus ?? "Lütfen bekleyin…")
+            Text(updateManager.updateStatus ?? L("update.please_wait"))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

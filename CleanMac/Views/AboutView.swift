@@ -3,6 +3,7 @@ import SwiftUI
 
 struct AboutView: View {
     @ObservedObject var updateManager: UpdateManager
+    @ObservedObject var languageManager: LanguageManager
     @Environment(\.dismiss) private var dismiss
 
     private let iban = "TR51 0015 7000 0000 0088 1408 69"
@@ -11,26 +12,28 @@ struct AboutView: View {
         VStack(spacing: 16) {
             BrandLogoView(size: 112, cornerRadius: 24)
 
-            Text("CleanMac")
+            Text(L("app.name"))
                 .font(.title.weight(.semibold))
 
-            Text("Sürüm \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
+            Text(L("about.version", Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
-            Button("Güncellemeleri Denetle") {
+            LanguageToggleView(languageManager: languageManager)
+
+            Button(L("about.check_updates")) {
                 Task { await updateManager.checkForUpdates(force: true) }
             }
             .controlSize(.regular)
 
-            Text("Xcode ve Flutter geliştirici önbelleklerini güvenle temizler.\nSon build ve güncel cihaz sembolleri korunur.")
+            Text(L("about.description"))
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 300)
 
             VStack(spacing: 6) {
-                Text("Geliştirici: Mesut As")
+                Text(L("about.developer"))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
@@ -45,7 +48,7 @@ struct AboutView: View {
 
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 6) {
-                    Text("Destek")
+                    Text(L("about.support"))
                         .font(.subheadline.weight(.semibold))
                     Link("Buy Me a Coffee", destination: URL(string: "https://buymeacoffee.com/mesutasdevw")!)
                         .font(.subheadline)
@@ -55,11 +58,11 @@ struct AboutView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Grid(alignment: .leading, horizontalSpacing: 8, verticalSpacing: 6) {
                         GridRow(alignment: .firstTextBaseline) {
-                            supportLabel("Hesap Sahibi")
+                            supportLabel(L("about.account_holder"))
                             supportValue("Mesut As")
                         }
                         GridRow(alignment: .firstTextBaseline) {
-                            supportLabel("Banka")
+                            supportLabel(L("about.bank"))
                             supportValue("EnPara")
                         }
                         GridRow(alignment: .firstTextBaseline) {
@@ -77,12 +80,12 @@ struct AboutView: View {
                                         .font(.caption2)
                                 }
                                 .buttonStyle(.borderless)
-                                .help("IBAN'ı kopyala")
+                                .help(L("about.copy_iban"))
                             }
                         }
                     }
 
-                    Text("Açıklama: CleanMac destek (veya istediğiniz bir not)")
+                    Text(L("about.transfer_note"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -92,7 +95,7 @@ struct AboutView: View {
             }
             .frame(maxWidth: .infinity)
 
-            Button("Tamam") {
+            Button(L("about.ok")) {
                 dismiss()
             }
             .keyboardShortcut(.defaultAction)

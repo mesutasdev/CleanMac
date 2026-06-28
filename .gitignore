@@ -1,6 +1,7 @@
 .DS_Store
 build/
 DerivedData/
+.venv-assets/
 *.xcuserstate
 xcuserdata/
 *.xcodeproj/project.xcworkspace/xcuserdata/

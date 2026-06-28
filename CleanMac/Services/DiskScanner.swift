@@ -85,7 +85,7 @@ enum DiskScanner {
         case .xcodeDerivedData:
             let folders = stale + systemCaches
             let totalSize = DerivedDataHelper.totalSize(of: folders)
-            let detail = latest.map { "\(DerivedDataHelper.displayName(for: $0)) korunuyor" }
+            let detail = latest.map { L("derived.preserved", DerivedDataHelper.displayName(for: $0)) }
             return ScanMeasurement(
                 sizeBytes: totalSize,
                 exists: totalSize > 0,
@@ -98,7 +98,7 @@ enum DiskScanner {
                 return ScanMeasurement(sizeBytes: 0, exists: false, detail: nil, locationPaths: [])
             }
             let size = DerivedDataHelper.directorySize(at: latest)
-            let detail = "Proje: \(DerivedDataHelper.displayName(for: latest))"
+            let detail = L("derived.project", DerivedDataHelper.displayName(for: latest))
             return ScanMeasurement(
                 sizeBytes: size,
                 exists: size > 0,
@@ -112,37 +112,56 @@ enum DiskScanner {
     }
 
     private static func measureFlutterBuilds(_ kind: CleanTargetKind, home: URL) -> ScanMeasurement {
-        let projectsRoot = FlutterBuildHelper.projectsRootURL(home: home)
-        guard FileManager.default.fileExists(atPath: projectsRoot.path) else {
-            return ScanMeasurement(sizeBytes: 0, exists: false, detail: nil)
+        let projects = FlutterBuildHelper.projectsWithArtifacts(home: home)
+        guard !projects.isEmpty else {
+            let roots = FlutterBuildHelper.projectSearchRoots(home: home)
+            if roots.isEmpty {
+                return ScanMeasurement(
+                    sizeBytes: 0,
+                    exists: false,
+                    detail: L("flutter.no_projects"),
+                    locationPaths: [],
+                    locationNote: L("flutter.search_note")
+                )
+            }
+            return ScanMeasurement(
+                sizeBytes: 0,
+                exists: false,
+                detail: L("flutter.no_build_folders"),
+                locationPaths: PathDisplayHelper.displayPaths(roots, home: home),
+                locationNote: L("flutter.scanned_projects")
+            )
         }
 
-        let latest = FlutterBuildHelper.latestProject(in: projectsRoot)
-        let staleFolders = FlutterBuildHelper.staleArtifactFolders(in: projectsRoot)
+        let latest = FlutterBuildHelper.latestProject(home: home)
+        let staleFolders = FlutterBuildHelper.staleArtifactFolders(home: home)
+        let rootsNote = FlutterBuildHelper.searchRootsSummary(home: home)
 
         switch kind {
         case .flutterStaleBuilds:
             let totalSize = FlutterBuildHelper.totalSize(of: staleFolders)
-            let detail = latest.map { "\(FlutterBuildHelper.displayName(for: $0)) korunuyor" }
+            let detail = latest.map { L("flutter.preserved", FlutterBuildHelper.displayName(for: $0), rootsNote) }
             return ScanMeasurement(
                 sizeBytes: totalSize,
                 exists: totalSize > 0,
                 detail: detail,
-                locationPaths: PathDisplayHelper.displayPaths(staleFolders, home: home)
+                locationPaths: PathDisplayHelper.displayPaths(staleFolders, home: home),
+                locationNote: L("flutter.projects_count", projects.count)
             )
 
         case .flutterLastBuild:
-            let latestFolders = FlutterBuildHelper.latestArtifactFolders(in: projectsRoot)
+            let latestFolders = FlutterBuildHelper.latestArtifactFolders(home: home)
             guard let latest, !latestFolders.isEmpty else {
                 return ScanMeasurement(sizeBytes: 0, exists: false, detail: nil, locationPaths: [])
             }
             let size = FlutterBuildHelper.totalSize(of: latestFolders)
-            let detail = "Proje: \(FlutterBuildHelper.displayName(for: latest))"
+            let detail = L("flutter.project_detail", FlutterBuildHelper.displayName(for: latest), rootsNote)
             return ScanMeasurement(
                 sizeBytes: size,
                 exists: size > 0,
                 detail: detail,
-                locationPaths: PathDisplayHelper.displayPaths(latestFolders, home: home)
+                locationPaths: PathDisplayHelper.displayPaths(latestFolders, home: home),
+                locationNote: L("flutter.projects_count", projects.count)
             )
 
         default:
@@ -165,7 +184,7 @@ enum DiskScanner {
             let totalSize = DeviceSupportHelper.totalSize(of: stale)
             let detail: String?
             if let preservedVersion {
-                detail = "iOS \(preservedVersion) korunuyor — simülatör değil"
+                detail = L("device.preserved_ios", preservedVersion)
             } else {
                 detail = nil
             }
@@ -178,7 +197,7 @@ enum DiskScanner {
 
         case .xcodeDeviceSupportLatest:
             let totalSize = DeviceSupportHelper.totalSize(of: latest)
-            let detail = preservedVersion.map { "iOS \($0) — diskteki en yüksek sürüm sembolleri" }
+            let detail = preservedVersion.map { L("device.latest_ios", $0) }
             return ScanMeasurement(
                 sizeBytes: totalSize,
                 exists: totalSize > 0,
@@ -206,7 +225,11 @@ enum DiskScanner {
             paths.append(devicePath)
         }
 
-        let detail = uuids.isEmpty ? nil : "\(uuids.count) kullanılamayan simülatör"
+        let detail = uuids.isEmpty ? nil : L(
+            "simulator.detail",
+            uuids.count,
+            ByteCountFormatter.string(from: totalSize)
+        )
         return ScanMeasurement(
             sizeBytes: totalSize,
             exists: !uuids.isEmpty,

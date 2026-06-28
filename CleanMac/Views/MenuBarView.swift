@@ -5,27 +5,27 @@ struct MenuBarView: View {
     @ObservedObject var updateManager: UpdateManager
 
     var body: some View {
-        Button("CleanMac'i Aç") {
+        Button(L("menu.open")) {
             MainWindowController.show()
         }
 
         Divider()
 
         if updateManager.availableUpdate != nil {
-            Button("Güncelle (\(updateManager.availableUpdate?.versionLabel ?? ""))") {
+            Button(L("menu.update", updateManager.availableUpdate?.versionLabel ?? "")) {
                 MainWindowController.show()
                 updateManager.showUpdateAlert = true
             }
             Divider()
         }
 
-        Button("Yeniden Tara") {
+        Button(L("menu.refresh")) {
             MainWindowController.show()
             NotificationCenter.default.post(name: .cleanMacScan, object: nil)
         }
         .disabled(viewModel.isScanning || viewModel.isCleaning)
 
-        Button("Yer Aç…") {
+        Button(L("menu.free_space")) {
             MainWindowController.show()
             viewModel.requestClean()
         }
@@ -33,13 +33,13 @@ struct MenuBarView: View {
 
         Divider()
 
-        Button("CleanMac Hakkında") {
+        Button(L("menu.about")) {
             viewModel.presentAbout()
         }
 
         Divider()
 
-        Button("CleanMac'den Çık") {
+        Button(L("menu.quit")) {
             NSApplication.shared.terminate(nil)
         }
         .keyboardShortcut("q")

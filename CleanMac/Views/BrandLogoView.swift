@@ -11,6 +11,10 @@ struct BrandLogoView: View {
             .aspectRatio(contentMode: .fit)
             .frame(width: size, height: size)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-            .shadow(color: .black.opacity(0.12), radius: 4, y: 2)
+            .overlay {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(.white.opacity(0.08), lineWidth: 1)
+            }
+            .shadow(color: .black.opacity(0.18), radius: 6, y: 3)
     }
 }
