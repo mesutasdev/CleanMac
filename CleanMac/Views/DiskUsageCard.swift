@@ -2,7 +2,8 @@ import SwiftUI
 
 struct DiskUsageCard: View {
     let diskSpace: DiskSpaceInfo?
-    let reclaimableBytes: Int64
+    let selectedBytes: Int64
+    let permanentBytes: Int64
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -46,11 +47,11 @@ struct DiskUsageCard: View {
                     )
                 }
 
-                if reclaimableBytes > 0 {
+                if selectedBytes > 0 {
                     Divider()
 
                     Label {
-                        Text("Temizlik sonrası ~\(ByteCountFormatter.string(from: diskSpace.projectedFree(afterReclaiming: reclaimableBytes))) boş alan")
+                        Text(projectionText(for: diskSpace))
                             .font(.subheadline)
                             .fixedSize(horizontal: false, vertical: true)
                     } icon: {
@@ -91,12 +92,22 @@ struct DiskUsageCard: View {
         if freeRatio < 0.15 { return .orange }
         return .accentColor
     }
+
+    private func projectionText(for disk: DiskSpaceInfo) -> String {
+        let projected = ByteCountFormatter.string(from: disk.projectedFree(afterReclaiming: selectedBytes))
+        if permanentBytes > 0, selectedBytes > permanentBytes {
+            let permanent = ByteCountFormatter.string(from: disk.projectedFree(afterReclaiming: permanentBytes))
+            return "Temizlik sonrası ~\(projected) boş alan (kalıcı: ~\(permanent))"
+        }
+        return "Temizlik sonrası ~\(projected) boş alan"
+    }
 }
 
 #Preview {
     DiskUsageCard(
         diskSpace: DiskSpaceInfo(volumeName: "Macintosh HD", totalBytes: 250_000_000_000, freeBytes: 12_000_000_000),
-        reclaimableBytes: 16_000_000_000
+        selectedBytes: 16_000_000_000,
+        permanentBytes: 12_000_000_000
     )
     .padding()
     .frame(width: 520)

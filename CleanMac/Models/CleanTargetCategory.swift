@@ -24,7 +24,7 @@ enum CleanTargetCategory: Int, CaseIterable, Hashable, Sendable {
         case .reclaimable:
             return "Eski build ve kullanılmayan dosyalar. Silince disk gerçekten boşalır; sadece o projeyi tekrar derlersen dolmaya başlar."
         case .conditional:
-            return "Arşiv veya eski cihaz sembolleri. Yeniden yükleme veya debug için tekrar oluşturman gerekebilir."
+            return "Xcode arşivleri ve simülatör cache/log dosyaları. Gerekirse yeniden oluşturman gerekebilir."
         case .destructive:
             return "Yalnızca kasıtlı sıfırlama için. Son build ve güncel cihaz sembolleri varsayılan olarak korunur."
         case .regenerating:

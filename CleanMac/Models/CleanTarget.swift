@@ -6,6 +6,7 @@ struct CleanTarget: Identifiable, Sendable {
     var exists: Bool
     var isSelected: Bool
     var detail: String?
+    var locationPaths: [String] = []
 
     var id: String { kind.id }
 
@@ -15,6 +16,7 @@ struct CleanTarget: Identifiable, Sendable {
     var impactBadge: CleanTargetKind.ImpactBadge { kind.impactBadge }
     var category: CleanTargetCategory { kind.category }
     var statusNote: String? { detail }
+    var locationNote: String?
     var icon: String { kind.icon }
 
     static func makeDefaults() -> [CleanTarget] {

@@ -19,12 +19,15 @@ struct ContentView: View {
             await viewModel.scan()
         }
         .onReceive(NotificationCenter.default.publisher(for: .cleanMacSelectRecommended)) { _ in
+            MainWindowController.show()
             viewModel.selectRecommended()
         }
         .onReceive(NotificationCenter.default.publisher(for: .cleanMacDeselectAll)) { _ in
+            MainWindowController.show()
             viewModel.selectAll(false)
         }
         .onReceive(NotificationCenter.default.publisher(for: .cleanMacScan)) { _ in
+            MainWindowController.show()
             Task { await viewModel.scan() }
         }
         .onReceive(NotificationCenter.default.publisher(for: .cleanMacClean)) { _ in

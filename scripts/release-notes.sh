@@ -22,5 +22,10 @@ Manuel kurulum: CleanMac'i kapat → \`${APP_NAME}.app\` dosyasını Application
 Apple Developer ID ile imzalanmış ve notarize edilmiştir.
 
 ### Bu sürümde
-- Varsayılan pencere yüksekliği 800px (1020×800)
+- **Önerilenleri Seç** ve checkbox seçimleri düzeltildi
+- Temizlik sonrası başarı mesajı artık kaybolmuyor
+- Temizle onayı gizli pencerede kalmıyor
+- Silinecek dosyaların konumu (path) listeleniyor, Finder'da açılabilir
+- Sidebar GB tutarlılığı, simülatör gerçek disk ölçümü, npm yalnızca _cacache
+- Açılış donması giderildi, kısmi silme uyarıları eklendi
 EOF

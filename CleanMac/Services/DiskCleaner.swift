@@ -112,6 +112,7 @@ enum DiskCleaner {
         let fm = FileManager.default
         var freedBytes: Int64 = 0
         var lastError: String?
+        var failedCount = 0
 
         for folder in folders {
             guard fm.fileExists(atPath: folder.path) else { continue }
@@ -121,12 +122,27 @@ enum DiskCleaner {
                 try fm.removeItem(at: folder)
                 freedBytes += size
             } catch {
+                failedCount += 1
                 lastError = error.localizedDescription
             }
         }
 
-        if let lastError, freedBytes == 0 {
-            return CleanResult(kind: target.kind, freedBytes: 0, success: false, message: lastError)
+        if freedBytes == 0, failedCount > 0 {
+            return CleanResult(
+                kind: target.kind,
+                freedBytes: 0,
+                success: false,
+                message: lastError ?? "Silinemedi"
+            )
+        }
+
+        if failedCount > 0 {
+            return CleanResult(
+                kind: target.kind,
+                freedBytes: freedBytes,
+                success: true,
+                message: "\(failedCount) klasör silinemedi"
+            )
         }
 
         return CleanResult(kind: target.kind, freedBytes: freedBytes, success: true, message: nil)

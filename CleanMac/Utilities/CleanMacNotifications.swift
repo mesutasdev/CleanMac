@@ -5,7 +5,6 @@ extension Notification.Name {
     static let cleanMacDeselectAll = Notification.Name("CleanMac.deselectAll")
     static let cleanMacScan = Notification.Name("CleanMac.scan")
     static let cleanMacClean = Notification.Name("CleanMac.clean")
-    static let cleanMacShowWindow = Notification.Name("CleanMac.showWindow")
     /// DMG kurulum scriptinden gelen kapatma isteği
     static let cleanMacInstallQuit = Notification.Name("com.cleanmac.app.installQuit")
 }

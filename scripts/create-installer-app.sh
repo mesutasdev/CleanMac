@@ -12,13 +12,16 @@ APP_SOURCE="$STAGING/CleanMac.app"
 
 [[ -d "$APP_SOURCE" ]] || { echo "CleanMac.app staging'de bulunamadı: $APP_SOURCE" >&2; exit 1; }
 
+APP_VERSION="$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$APP_SOURCE/Contents/Info.plist")"
+APP_BUILD="$(/usr/libexec/PlistBuddy -c 'Print CFBundleVersion' "$APP_SOURCE/Contents/Info.plist")"
+
 mkdir -p "$MACOS" "$RESOURCES"
 ditto "$APP_SOURCE" "$RESOURCES/CleanMac.app"
 cp "$(cd "$(dirname "$0")" && pwd)/dmg-install.sh" "$MACOS/install"
 chmod +x "$MACOS/install"
 
 /usr/libexec/PlistBuddy -c "Add :CFBundleDevelopmentRegion string tr" "$MACOS/../Info.plist" 2>/dev/null || true
-cat > "$INSTALLER/Contents/Info.plist" <<'EOF'
+cat > "$INSTALLER/Contents/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -36,9 +39,9 @@ cat > "$INSTALLER/Contents/Info.plist" <<'EOF'
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>${APP_VERSION}</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>${APP_BUILD}</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>13.0</string>
 	<key>LSUIElement</key>

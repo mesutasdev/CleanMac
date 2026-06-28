@@ -44,10 +44,14 @@ enum DeviceSupportHelper {
             guard fm.fileExists(atPath: url.path, isDirectory: &isDirectory), isDirectory.boolValue else {
                 return nil
             }
-            guard let version = parseIOSVersion(from: url.lastPathComponent) else {
-                return nil
+            if let version = parseIOSVersion(from: url.lastPathComponent) {
+                return Folder(url: url, version: version, displayName: url.lastPathComponent)
             }
-            return Folder(url: url, version: version, displayName: url.lastPathComponent)
+            return Folder(
+                url: url,
+                version: IOSVersion(major: 0, minor: 0, patch: 0),
+                displayName: url.lastPathComponent
+            )
         }
     }
 

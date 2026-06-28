@@ -1,16 +1,14 @@
+import AppKit
 import SwiftUI
 
 struct TargetRowView: View {
     let target: CleanTarget
-    let onToggle: () -> Void
+    @Binding var isSelected: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top, spacing: 12) {
-                Toggle(isOn: Binding(
-                    get: { target.isSelected },
-                    set: { _ in onToggle() }
-                )) {
+                Toggle(isOn: $isSelected) {
                     EmptyView()
                 }
                 .toggleStyle(.checkbox)
@@ -51,6 +49,10 @@ struct TargetRowView: View {
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
+
+                    if !target.locationPaths.isEmpty {
+                        LocationPathsView(paths: target.locationPaths, note: target.locationNote)
+                    }
 
                     if let note = target.statusNote {
                         Label {
@@ -108,6 +110,72 @@ struct TargetRowView: View {
         if target.sizeBytes > 0 {
             return ByteCountFormatter.string(from: target.sizeBytes)
         }
+        if target.kind == .simulatorUnavailable, let note = target.statusNote {
+            return note
+        }
         return "—"
+    }
+}
+
+private struct LocationPathsView: View {
+    let paths: [String]
+    let note: String?
+
+    private let displayLimit = 5
+
+    private var visiblePaths: [String] {
+        Array(paths.prefix(displayLimit))
+    }
+
+    private var hiddenCount: Int {
+        max(0, paths.count - displayLimit)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Konum")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+
+            ForEach(visiblePaths, id: \.self) { path in
+                HStack(alignment: .top, spacing: 6) {
+                    Text(path)
+                        .font(.system(.caption, design: .monospaced))
+                        .textSelection(.enabled)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    if path.hasPrefix("~/") || path.hasPrefix("/") {
+                        Button {
+                            revealInFinder(path)
+                        } label: {
+                            Image(systemName: "folder")
+                                .font(.caption2)
+                        }
+                        .buttonStyle(.borderless)
+                        .help("Finder'da göster")
+                    }
+                }
+            }
+
+            if hiddenCount > 0 {
+                Text("+\(hiddenCount) konum daha")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+
+            if let note {
+                Text(note)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(.top, 2)
+    }
+
+    private func revealInFinder(_ path: String) {
+        let expanded = (path as NSString).expandingTildeInPath
+        guard FileManager.default.fileExists(atPath: expanded) else { return }
+        NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: expanded)
     }
 }

@@ -1,7 +1,7 @@
 import AppKit
 
 enum RunningInstanceHelper {
-    /// Güncelleme sırasında açık kalan eski CleanMac sürecini kapatır.
+    /// Güncelleme sırasında açık kalan eski CleanMac sürecini kapatır (ana thread'i bloklamaz).
     static func terminateOtherInstances() {
         guard let bundleID = Bundle.main.bundleIdentifier else { return }
 
@@ -15,15 +15,15 @@ enum RunningInstanceHelper {
             app.terminate()
         }
 
-        for _ in 0..<40 {
-            if others.allSatisfy(\.isTerminated) { return }
-            Thread.sleep(forTimeInterval: 0.1)
-        }
+        DispatchQueue.global(qos: .utility).async {
+            for _ in 0..<40 {
+                if others.allSatisfy(\.isTerminated) { return }
+                Thread.sleep(forTimeInterval: 0.1)
+            }
 
-        for app in others where !app.isTerminated {
-            app.forceTerminate()
+            for app in others where !app.isTerminated {
+                app.forceTerminate()
+            }
         }
-
-        Thread.sleep(forTimeInterval: 0.3)
     }
 }

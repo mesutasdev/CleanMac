@@ -3,6 +3,12 @@ import SwiftUI
 
 @MainActor
 final class CleanMacViewModel: ObservableObject {
+    struct ScanOptions {
+        var clearStatusMessage = true
+        var resetLastFreed = true
+        var autoSelectRecommended = true
+    }
+
     @Published var targets: [CleanTarget] = CleanTarget.makeDefaults()
     @Published var isScanning = false
     @Published var isCleaning = false
@@ -35,6 +41,10 @@ final class CleanMacViewModel: ObservableObject {
         targets.contains { $0.sizeBytes > 0 || $0.exists }
     }
 
+    var hasActiveSelection: Bool {
+        targets.contains { $0.isSelected && $0.sizeBytes > 0 }
+    }
+
     var includesLastBuildDeletion: Bool {
         targets.contains {
             ($0.kind == .xcodeDerivedDataLastBuild || $0.kind == .flutterLastBuild)
@@ -53,6 +63,12 @@ final class CleanMacViewModel: ObservableObject {
 
     func totalBytes(in category: CleanTargetCategory) -> Int64 {
         targets(in: category).reduce(0) { $0 + max(0, $1.sizeBytes) }
+    }
+
+    func selectedBytes(in category: CleanTargetCategory) -> Int64 {
+        targets(in: category)
+            .filter(\.isSelected)
+            .reduce(0) { $0 + max(0, $1.sizeBytes) }
     }
 
     func visibleCategories() -> [CleanTargetCategory] {
@@ -90,13 +106,16 @@ final class CleanMacViewModel: ObservableObject {
         showAbout = true
     }
 
-    func scan() async {
+    func scan(options: ScanOptions = ScanOptions()) async {
         guard !isScanning else { return }
         isScanning = true
         statusMessage = "Önbellekler taranıyor..."
-        lastFreedBytes = 0
+        if options.resetLastFreed {
+            lastFreedBytes = 0
+        }
         refreshDiskSpace()
 
+        let wasFirstScan = !hasScanned
         let previousSelection = Dictionary(uniqueKeysWithValues: targets.map { ($0.id, $0.isSelected) })
         let scanned = await DiskScanner.scanAll()
 
@@ -105,21 +124,50 @@ final class CleanMacViewModel: ObservableObject {
             if let selected = previousSelection[target.id] {
                 updated.isSelected = selected
             }
+            if updated.sizeBytes == 0 {
+                updated.isSelected = false
+            }
             return updated
         }
 
         isScanning = false
-        statusMessage = nil
+        if options.clearStatusMessage {
+            statusMessage = nil
+        }
         refreshDiskSpace()
 
-        if !previousSelection.values.contains(true) {
-            selectRecommended()
+        if options.autoSelectRecommended {
+            let hadMeaningfulSelection = previousSelection.contains { id, selected in
+                guard selected else { return false }
+                return scanned.first(where: { $0.id == id })?.sizeBytes ?? 0 > 0
+            }
+            if wasFirstScan || !hadMeaningfulSelection {
+                selectRecommended()
+            }
         }
     }
 
     func toggleSelection(for target: CleanTarget) {
-        guard let index = targets.firstIndex(where: { $0.id == target.id }) else { return }
-        targets[index].isSelected.toggle()
+        setSelected(id: target.id, selected: !target.isSelected)
+    }
+
+    func setSelected(id: String, selected: Bool) {
+        guard let index = targets.firstIndex(where: { $0.id == id }) else { return }
+        guard targets[index].isSelected != selected else { return }
+        var updated = targets
+        updated[index].isSelected = selected
+        targets = updated
+    }
+
+    func selectionBinding(for id: String) -> Binding<Bool> {
+        Binding(
+            get: { [weak self] in
+                self?.targets.first(where: { $0.id == id })?.isSelected ?? false
+            },
+            set: { [weak self] selected in
+                self?.setSelected(id: id, selected: selected)
+            }
+        )
     }
 
     var includesDestructiveDeletion: Bool {
@@ -131,31 +179,33 @@ final class CleanMacViewModel: ObservableObject {
     }
 
     func selectRecommended() {
-        for index in targets.indices {
-            let target = targets[index]
-            let shouldSelect = target.category == .reclaimable && target.sizeBytes > 0
-            targets[index].isSelected = shouldSelect
+        targets = targets.map { target in
+            var updated = target
+            updated.isSelected = target.category == .reclaimable && target.sizeBytes > 0
+            return updated
         }
     }
 
     func selectAll(_ selected: Bool) {
-        for index in targets.indices {
-            let target = targets[index]
+        targets = targets.map { target in
+            var updated = target
             if !selected {
-                targets[index].isSelected = false
-                continue
+                updated.isSelected = false
+                return updated
             }
 
             let isHiddenRegenerating = target.category == .regenerating && !showRegeneratingCaches
             let isProtectedDestructive = target.kind == .xcodeDerivedDataLastBuild
                 || target.kind == .flutterLastBuild
                 || target.kind == .xcodeDeviceSupportLatest
-            targets[index].isSelected = target.sizeBytes > 0 && !isHiddenRegenerating && !isProtectedDestructive
+            updated.isSelected = target.sizeBytes > 0 && !isHiddenRegenerating && !isProtectedDestructive
+            return updated
         }
     }
 
     func requestClean() {
         guard selectedTotalBytes > 0, !isCleaning else { return }
+        MainWindowController.show()
         showCleanConfirmation = true
     }
 
@@ -174,21 +224,31 @@ final class CleanMacViewModel: ObservableObject {
         lastFreedBytes = freed
 
         let failed = results.filter { !$0.success }
+        let partial = results.filter { $0.success && $0.message != nil }
+
+        let completionMessage: String
         if failed.isEmpty {
             if hadRegenerating {
-                statusMessage = "\(ByteCountFormatter.string(from: freed)) açıldı — bir kısmı bir sonraki build'de geri gelebilir"
+                completionMessage = "\(ByteCountFormatter.string(from: freed)) açıldı — bir kısmı bir sonraki build'de geri gelebilir"
             } else {
-                statusMessage = "\(ByteCountFormatter.string(from: freed)) kalıcı olarak açıldı"
+                completionMessage = "\(ByteCountFormatter.string(from: freed)) kalıcı olarak açıldı"
             }
         } else {
             let names = failed.map(\.kind.title).joined(separator: ", ")
-            statusMessage = "\(ByteCountFormatter.string(from: freed)) açıldı — hata: \(names)"
+            completionMessage = "\(ByteCountFormatter.string(from: freed)) açıldı — hata: \(names)"
         }
 
-        await scan()
+        if !partial.isEmpty, failed.isEmpty {
+            let notes = partial.compactMap(\.message).joined(separator: "; ")
+            statusMessage = "\(completionMessage) (\(notes))"
+        } else {
+            statusMessage = completionMessage
+        }
+
+        await scan(options: ScanOptions(clearStatusMessage: false, resetLastFreed: false, autoSelectRecommended: true))
         isCleaning = false
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 6) { [weak self] in
             guard let message = self?.statusMessage else { return }
             if message.contains("açıldı") {
                 self?.statusMessage = nil

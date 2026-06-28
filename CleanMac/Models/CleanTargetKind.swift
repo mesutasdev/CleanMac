@@ -66,7 +66,7 @@ enum CleanTargetKind: String, CaseIterable, Identifiable, Sendable {
         case .xcodeDerivedDataLastBuild:
             return "En son derlediğin projenin DerivedData klasörü"
         case .flutterStaleBuilds:
-            return "Developer/projects içindeki eski Flutter projelerinin build çıktıları"
+            return "~/Developer/projects altındaki eski Flutter build ve .dart_tool klasörleri"
         case .flutterLastBuild:
             return "En son derlediğin Flutter projesinin build ve .dart_tool klasörleri"
         case .xcodeArchives:
@@ -74,11 +74,11 @@ enum CleanTargetKind: String, CaseIterable, Identifiable, Sendable {
         case .xcodeDeviceSupport:
             return "Gerçek iPhone/iPad için eski iOS sürüm sembolleri — simülatör değil"
         case .xcodeDeviceSupportLatest:
-            return "Bağlı cihazının güncel iOS sürüm sembolleri — simülatör değil"
+            return "Diskteki en yüksek iOS sürüm sembolleri — simülatör değil"
         case .xcodeCaches:
             return "Xcode geçici dosyaları — kısa sürede yeniden oluşur"
         case .simulatorUnavailable:
-            return "Güncelleme sonrası kullanılamayan simülatör runtime'ları"
+            return "Güncelleme sonrası kullanılamayan simülatör cihaz kayıtları"
         case .simulatorData:
             return "Simülatör cache ve log dosyaları"
         case .cocoaPodsCache:
@@ -88,7 +88,7 @@ enum CleanTargetKind: String, CaseIterable, Identifiable, Sendable {
         case .gradleCache:
             return "Android bağımlılıkları — build ile geri gelir"
         case .npmCache:
-            return "Node paketleri — npm install ile geri gelir"
+            return "~/.npm/_cacache indirme önbelleği — npm install ile geri gelir"
         case .homebrewCache:
             return "Homebrew indirme arşivi — brew ile geri gelir"
         case .swiftPMCache:
@@ -111,7 +111,7 @@ enum CleanTargetKind: String, CaseIterable, Identifiable, Sendable {
         case .xcodeDeviceSupport:
             return "Simülatör etkilenmez, internetten simülatör indirmezsin. Eski iOS sürümleri kalıcı silinir; o sürümdeki cihazı USB ile bağlarsan semboller cihazdan yeniden kopyalanır."
         case .xcodeDeviceSupportLatest:
-            return "Güncel cihazının sembolleri silinir. Tekrar USB ile bağladığında Xcode yeniden kopyalar. Simülatör ve App Store indirmesi gerekmez."
+            return "Diskteki en yüksek iOS sembolleri silinir. Cihazı USB ile bağladığında Xcode yeniden kopyalar."
         case .xcodeCaches:
             return "Geçici boşluk — Xcode açılınca dosyalar yeniden oluşur. Bozuk cache şüphesi dışında silmeye değmez."
         case .simulatorUnavailable:
@@ -201,7 +201,7 @@ enum CleanTargetKind: String, CaseIterable, Identifiable, Sendable {
         case .gradleCache:
             return home.appending(path: ".gradle/caches")
         case .npmCache:
-            return home.appending(path: ".npm")
+            return home.appending(path: ".npm/_cacache")
         case .homebrewCache:
             return home.appending(path: "Library/Caches/Homebrew")
         case .swiftPMCache:

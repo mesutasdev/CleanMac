@@ -7,7 +7,8 @@ struct DetailView: View {
         VStack(spacing: 0) {
             SelectionActionsBar(
                 selectedBytes: viewModel.selectedTotalBytes,
-                isDisabled: viewModel.isScanning || viewModel.isCleaning,
+                isSelectionDisabled: viewModel.isCleaning || (viewModel.isScanning && !viewModel.hasScanned),
+                isCleanDisabled: viewModel.isCleaning || viewModel.isScanning || viewModel.selectedTotalBytes == 0,
                 onSelectRecommended: { viewModel.selectRecommended() },
                 onDeselectAll: { viewModel.selectAll(false) },
                 onClean: { viewModel.requestClean() }
@@ -19,7 +20,8 @@ struct DetailView: View {
                 Section {
                     DiskUsageCard(
                         diskSpace: viewModel.diskSpace,
-                        reclaimableBytes: viewModel.permanentReclaimBytes
+                        selectedBytes: viewModel.selectedTotalBytes,
+                        permanentBytes: viewModel.permanentReclaimBytes
                     )
                     .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 8, trailing: 16))
                     .listRowBackground(Color.clear)
@@ -48,9 +50,10 @@ struct DetailView: View {
                 ForEach(viewModel.filteredTargets(for: viewModel.sidebarSelection), id: \.0) { category, targets in
                     Section {
                         ForEach(targets) { target in
-                            TargetRowView(target: target) {
-                                viewModel.toggleSelection(for: target)
-                            }
+                            TargetRowView(
+                                target: target,
+                                isSelected: viewModel.selectionBinding(for: target.id)
+                            )
                         }
 
                         SectionCaptionRow(text: category.sectionFooter)
@@ -91,7 +94,8 @@ struct DetailView: View {
                 message: viewModel.statusMessage,
                 isScanning: viewModel.isScanning,
                 isCleaning: viewModel.isCleaning,
-                lastFreedBytes: viewModel.lastFreedBytes
+                lastFreedBytes: viewModel.lastFreedBytes,
+                hasActiveSelection: viewModel.hasActiveSelection
             )
         }
     }
@@ -106,38 +110,27 @@ struct DetailView: View {
             }
             .help("Önbellek boyutlarını yeniden hesapla (⌘R)")
             .disabled(viewModel.isScanning || viewModel.isCleaning)
-
-            Button(role: .destructive) {
-                viewModel.requestClean()
-            } label: {
-                Label("Temizle", systemImage: "trash")
-            }
-            .help("Seçili öğeleri kalıcı olarak sil (⌘⇧⌫)")
-            .disabled(viewModel.selectedTotalBytes == 0 || viewModel.isScanning || viewModel.isCleaning)
         }
     }
 }
 
 private struct SelectionActionsBar: View {
     let selectedBytes: Int64
-    let isDisabled: Bool
+    let isSelectionDisabled: Bool
+    let isCleanDisabled: Bool
     let onSelectRecommended: () -> Void
     let onDeselectAll: () -> Void
     let onClean: () -> Void
-
-    private var canClean: Bool {
-        selectedBytes > 0 && !isDisabled
-    }
 
     var body: some View {
         HStack(spacing: 10) {
             Button("Önerilenleri Seç", action: onSelectRecommended)
                 .buttonStyle(.bordered)
-                .disabled(isDisabled)
+                .disabled(isSelectionDisabled)
 
             Button("Seçimi Kaldır", action: onDeselectAll)
                 .buttonStyle(.bordered)
-                .disabled(isDisabled)
+                .disabled(isSelectionDisabled)
 
             Spacer(minLength: 12)
 
@@ -146,7 +139,7 @@ private struct SelectionActionsBar: View {
             }
             .buttonStyle(.borderedProminent)
             .tint(.green)
-            .disabled(!canClean)
+            .disabled(isCleanDisabled)
             .help("Seçili dosyaları sil ve disk alanı aç (⌘⇧⌫)")
         }
         .padding(.horizontal, 16)
@@ -185,6 +178,7 @@ private struct StatusBarView: View {
     let isScanning: Bool
     let isCleaning: Bool
     let lastFreedBytes: Int64
+    let hasActiveSelection: Bool
 
     var body: some View {
         HStack(spacing: 8) {
@@ -208,8 +202,13 @@ private struct StatusBarView: View {
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+            } else if hasActiveSelection {
+                Text("Seçili öğeler temizlenmeye hazır")
+                    .font(.callout)
+                    .foregroundStyle(.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
             } else {
-                Text("Önerilen dosyalar varsayılan olarak seçilidir")
+                Text("Önerilenleri Seç ile başlayabilirsin")
                     .font(.callout)
                     .foregroundStyle(.tertiary)
                     .fixedSize(horizontal: false, vertical: true)

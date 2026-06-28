@@ -30,7 +30,7 @@ struct SidebarView: View {
                             SidebarCategoryLabel(
                                 title: category.sidebarTitle,
                                 systemImage: category.systemImage,
-                                byteTotal: viewModel.totalBytes(in: category),
+                                byteTotal: viewModel.selectedBytes(in: category),
                                 tint: tint(for: category)
                             )
                         }
