@@ -12,6 +12,10 @@ struct CleanMacApp: App {
         } label: {
             Image("AppLogo")
                 .renderingMode(.template)
+                .resizable()
+                .interpolation(.high)
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 18, height: 18)
         }
         .menuBarExtraStyle(.menu)
 
