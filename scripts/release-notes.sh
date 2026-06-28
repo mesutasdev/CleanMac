@@ -24,8 +24,9 @@ Manuel kurulum: CleanMac'i kapat → \`${APP_NAME}.app\` dosyasını Application
 Apple Developer ID ile imzalanmış ve notarize edilmiştir.
 
 ### Bu sürümde
-- **Düzeltme:** DMG ve CleanMac'i Kur.app yeniden notarize edildi — Gatekeeper "zararlı" uyarısı giderildi
-- v1.0.23'teki tüm iyileştirmeler dahil (seçim düzeltmesi, dosya konumları, stabil layout)
+- **Yeni:** Uygulama açılışında otomatik güncelleme kontrolü — tek tıkla indirip kurar
+- Hakkında ekranından manuel "Güncellemeleri Denetle"
+- Menü çubuğunda güncelleme varsa hızlı erişim
 
 ### Destek
 

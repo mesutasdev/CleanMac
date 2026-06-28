@@ -3,6 +3,7 @@ import SwiftUI
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var installQuitObserver: NSObjectProtocol?
+    weak var updateManager: UpdateManager?
 
     func applicationWillFinishLaunching(_ notification: Notification) {
         RunningInstanceHelper.terminateOtherInstances()
@@ -19,6 +20,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             MainWindowController.show()
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            Task { await self?.updateManager?.checkForUpdates() }
         }
     }
 

@@ -1,0 +1,198 @@
+import AppKit
+import Foundation
+
+enum UpdateError: LocalizedError {
+    case invalidResponse
+    case missingVersion
+    case missingDownload
+    case downloadFailed
+    case mountFailed
+    case missingInstaller
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidResponse:
+            return "Güncelleme bilgisi alınamadı."
+        case .missingVersion:
+            return "Sürüm numarası okunamadı."
+        case .missingDownload:
+            return "İndirilebilir DMG bulunamadı."
+        case .downloadFailed:
+            return "Güncelleme indirilemedi."
+        case .mountFailed:
+            return "DMG dosyası açılamadı."
+        case .missingInstaller:
+            return "Kurulum dosyası DMG içinde bulunamadı."
+        }
+    }
+}
+
+struct AvailableUpdate: Identifiable, Sendable {
+    let id: String
+    let version: AppVersion
+    let downloadURL: URL
+    let releaseNotes: String?
+
+    var versionLabel: String { version.displayString }
+}
+
+actor UpdateService {
+    static let shared = UpdateService()
+
+    private let repo = "mesutasdev/CleanMac"
+    private let installerAppName = "CleanMac'i Kur.app"
+    private let appName = "CleanMac.app"
+
+    func fetchLatestUpdate() async throws -> AvailableUpdate? {
+        let url = URL(string: "https://api.github.com/repos/\(repo)/releases/latest")!
+        var request = URLRequest(url: url)
+        request.setValue("CleanMac/\(AppVersion.current?.displayString ?? "1.0")", forHTTPHeaderField: "User-Agent")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw UpdateError.invalidResponse
+        }
+
+        let release = try JSONDecoder().decode(GitHubRelease.self, from: data)
+        guard let version = AppVersion(release.tagName) else {
+            throw UpdateError.missingVersion
+        }
+
+        guard let asset = release.assets.first(where: {
+            $0.name.hasSuffix(".dmg") && $0.name.hasPrefix("CleanMac-")
+        }), let downloadURL = URL(string: asset.browserDownloadURL) else {
+            throw UpdateError.missingDownload
+        }
+
+        return AvailableUpdate(
+            id: version.displayString,
+            version: version,
+            downloadURL: downloadURL,
+            releaseNotes: release.body
+        )
+    }
+
+    func downloadAndInstall(
+        from downloadURL: URL,
+        progress: @escaping @Sendable (String) -> Void
+    ) async throws {
+        progress("Güncelleme indiriliyor…")
+
+        let downloadDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CleanMac-Update", isDirectory: true)
+        try FileManager.default.createDirectory(at: downloadDirectory, withIntermediateDirectories: true)
+
+        let destination = downloadDirectory.appendingPathComponent(downloadURL.lastPathComponent)
+        try? FileManager.default.removeItem(at: destination)
+
+        let (temporaryFile, response) = try await URLSession.shared.download(from: downloadURL)
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw UpdateError.downloadFailed
+        }
+
+        try FileManager.default.moveItem(at: temporaryFile, to: destination)
+
+        progress("Kurulum hazırlanıyor…")
+        let mountPoint = try mountImage(at: destination)
+
+        let installerURL = mountPoint.appendingPathComponent(installerAppName, isDirectory: true)
+        let appURL = mountPoint.appendingPathComponent(appName, isDirectory: true)
+
+        let launchURL: URL
+        if FileManager.default.fileExists(atPath: installerURL.path) {
+            launchURL = installerURL
+        } else if FileManager.default.fileExists(atPath: appURL.path) {
+            progress("Uygulama kopyalanıyor…")
+            try await installApplication(from: appURL)
+            return
+        } else {
+            throw UpdateError.missingInstaller
+        }
+
+        progress("Kuruluyor…")
+        let opened = await MainActor.run {
+            NSWorkspace.shared.open(launchURL)
+        }
+        guard opened else {
+            throw UpdateError.missingInstaller
+        }
+
+        try await Task.sleep(nanoseconds: 600_000_000)
+        await MainActor.run {
+            NSApplication.shared.terminate(nil)
+        }
+    }
+
+    private func mountImage(at url: URL) throws -> URL {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/hdiutil")
+        process.arguments = ["attach", "-nobrowse", "-plist", url.path]
+
+        let output = Pipe()
+        process.standardOutput = output
+        process.standardError = Pipe()
+
+        try process.run()
+        process.waitUntilExit()
+
+        guard process.terminationStatus == 0 else {
+            throw UpdateError.mountFailed
+        }
+
+        let data = output.fileHandleForReading.readDataToEndOfFile()
+        guard
+            let plist = try PropertyListSerialization.propertyList(from: data, format: nil) as? [[String: Any]],
+            let entities = plist.first?["system-entities"] as? [[String: Any]]
+        else {
+            throw UpdateError.mountFailed
+        }
+
+        for entity in entities {
+            if let mountPoint = entity["mount-point"] as? String {
+                return URL(fileURLWithPath: mountPoint, isDirectory: true)
+            }
+        }
+
+        throw UpdateError.mountFailed
+    }
+
+    @MainActor
+    private func installApplication(from source: URL) throws {
+        let target = URL(fileURLWithPath: "/Applications/CleanMac.app", isDirectory: true)
+        DistributedNotificationCenter.default().post(name: .cleanMacInstallQuit, object: nil)
+
+        try? FileManager.default.removeItem(at: target)
+        try FileManager.default.copyItem(at: source, to: target)
+
+        let xattr = Process()
+        xattr.executableURL = URL(fileURLWithPath: "/usr/bin/xattr")
+        xattr.arguments = ["-cr", target.path]
+        try? xattr.run()
+        xattr.waitUntilExit()
+
+        NSWorkspace.shared.open(target)
+        NSApplication.shared.terminate(nil)
+    }
+}
+
+private struct GitHubRelease: Decodable {
+    let tagName: String
+    let body: String?
+    let assets: [GitHubAsset]
+
+    enum CodingKeys: String, CodingKey {
+        case tagName = "tag_name"
+        case body
+        case assets
+    }
+}
+
+private struct GitHubAsset: Decodable {
+    let name: String
+    let browserDownloadURL: String
+
+    enum CodingKeys: String, CodingKey {
+        case name
+        case browserDownloadURL = "browser_download_url"
+    }
+}

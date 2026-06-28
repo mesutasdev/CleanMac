@@ -2,6 +2,7 @@ import AppKit
 import SwiftUI
 
 struct AboutView: View {
+    @ObservedObject var updateManager: UpdateManager
     @Environment(\.dismiss) private var dismiss
 
     private let iban = "TR51 0015 7000 0000 0088 1408 69"
@@ -16,6 +17,11 @@ struct AboutView: View {
             Text("Sürüm \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+
+            Button("Güncellemeleri Denetle") {
+                Task { await updateManager.checkForUpdates(force: true) }
+            }
+            .controlSize(.regular)
 
             Text("Xcode ve Flutter geliştirici önbelleklerini güvenle temizler.\nSon build ve güncel cihaz sembolleri korunur.")
                 .font(.callout)
@@ -94,6 +100,7 @@ struct AboutView: View {
         }
         .padding(32)
         .frame(width: 400)
+        .updateAlerts(updateManager: updateManager)
     }
 
     private func supportLabel(_ text: String) -> some View {

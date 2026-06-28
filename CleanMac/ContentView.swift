@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var viewModel: CleanMacViewModel
+    @ObservedObject var updateManager: UpdateManager
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
 
     var body: some View {
@@ -12,10 +13,12 @@ struct ContentView: View {
             DetailView(viewModel: viewModel)
         }
         .frame(minWidth: 900, minHeight: 640)
+        .updateAlerts(updateManager: updateManager)
         .onAppear {
             viewModel.refreshDiskSpace()
         }
         .task {
+            await updateManager.checkForUpdates()
             await viewModel.scan()
         }
         .onReceive(NotificationCenter.default.publisher(for: .cleanMacSelectRecommended)) { _ in
@@ -42,7 +45,7 @@ struct ContentView: View {
             Text(confirmationMessage)
         }
         .sheet(isPresented: $viewModel.showAbout) {
-            AboutView()
+            AboutView(updateManager: updateManager)
         }
     }
 
@@ -59,5 +62,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView(viewModel: CleanMacViewModel())
+    ContentView(viewModel: CleanMacViewModel(), updateManager: UpdateManager())
 }

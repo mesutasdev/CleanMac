@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MenuBarView: View {
     @ObservedObject var viewModel: CleanMacViewModel
+    @ObservedObject var updateManager: UpdateManager
 
     var body: some View {
         Button("CleanMac'i Aç") {
@@ -9,6 +10,14 @@ struct MenuBarView: View {
         }
 
         Divider()
+
+        if updateManager.availableUpdate != nil {
+            Button("Güncelle (\(updateManager.availableUpdate?.versionLabel ?? ""))") {
+                MainWindowController.show()
+                updateManager.showUpdateAlert = true
+            }
+            Divider()
+        }
 
         Button("Yeniden Tara") {
             MainWindowController.show()

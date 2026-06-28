@@ -4,19 +4,23 @@ import SwiftUI
 struct CleanMacApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var viewModel = CleanMacViewModel()
+    @StateObject private var updateManager = UpdateManager()
 
     var body: some Scene {
         MenuBarExtra {
-            MenuBarView(viewModel: viewModel)
+            MenuBarView(viewModel: viewModel, updateManager: updateManager)
         } label: {
             MenuBarLabel()
         }
         .menuBarExtraStyle(.menu)
 
         Window("CleanMac", id: "main") {
-            ContentView(viewModel: viewModel)
+            ContentView(viewModel: viewModel, updateManager: updateManager)
                 .background {
                     MainWindowConfigurator()
+                }
+                .onAppear {
+                    appDelegate.updateManager = updateManager
                 }
         }
         .defaultSize(width: 1020, height: 800)
