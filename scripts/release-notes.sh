@@ -27,7 +27,8 @@ Manuel kurulum: CleanMac'i kapat → \`${APP_NAME}.app\` dosyasını Application
 Apple Developer ID ile imzalanmış ve notarize edilmiştir.
 
 ### Bu sürümde
-- **İyileştirme:** Sidebar genişletildi, görünüm seçici (System/Light/Dark) daha rahat yerleşim
+- **Düzeltme:** Disk kullanılabilir alanı artık macOS Sistem Ayarları ile aynı metrikten okunuyor
+- **İyileştirme:** Genel Bakış ekranına her gelişte disk bilgisi yenileniyor
 
 ### Destek
 

@@ -44,8 +44,9 @@ enum DiskSpaceService {
             return nil
         }
 
-        let free = numericCapacity(values.volumeAvailableCapacityForImportantUsage)
-            ?? numericCapacity(values.volumeAvailableCapacity)
+        // Match macOS System Settings "Available" (excludes purgeable cache space).
+        let free = numericCapacity(values.volumeAvailableCapacity)
+            ?? numericCapacity(values.volumeAvailableCapacityForImportantUsage)
             ?? 0
 
         return DiskSpaceInfo(

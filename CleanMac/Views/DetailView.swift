@@ -29,6 +29,9 @@ struct DetailView: View {
                 } header: {
                     Text(L("detail.disk_space"))
                 }
+                .onAppear {
+                    viewModel.refreshDiskSpace()
+                }
             }
 
             if viewModel.isScanning && !viewModel.hasScanned {
