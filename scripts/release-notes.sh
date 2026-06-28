@@ -20,4 +20,9 @@ Geliştiriciler için Mac disk temizleyici — Xcode, Flutter, npm, Gradle cache
 **Gereksinim:** macOS 13.0 (Ventura) veya üzeri
 
 Apple Developer ID ile imzalanmış ve notarize edilmiştir.
+
+### Bu sürümde
+- Sidebar'da **CleanMac Hakkında** butonu
+- Destek bilgileri: [Buy Me a Coffee](https://buymeacoffee.com/mesutasdevw), EnPara IBAN (Mesut As)
+- Geliştirici linkleri: [mesutas.com](https://mesutas.com) | [TechAs.co](https://techas.co)
 EOF

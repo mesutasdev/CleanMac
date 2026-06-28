@@ -4,41 +4,57 @@ struct SidebarView: View {
     @ObservedObject var viewModel: CleanMacViewModel
 
     var body: some View {
-        List(selection: $viewModel.sidebarSelection) {
-            Section {
-                SidebarSummaryCard(
-                    permanentBytes: viewModel.permanentReclaimBytes,
-                    temporaryBytes: viewModel.temporaryReclaimBytes,
-                    isScanning: viewModel.isScanning
-                )
-                .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-            }
-
-            Section("Kategoriler") {
-                NavigationLink(value: SidebarSelection.overview) {
-                    SidebarCategoryLabel(
-                        title: "Genel Bakış",
-                        systemImage: "square.grid.2x2",
-                        byteTotal: viewModel.selectedTotalBytes,
-                        tint: .accentColor
+        VStack(spacing: 0) {
+            List(selection: $viewModel.sidebarSelection) {
+                Section {
+                    SidebarSummaryCard(
+                        permanentBytes: viewModel.permanentReclaimBytes,
+                        temporaryBytes: viewModel.temporaryReclaimBytes,
+                        isScanning: viewModel.isScanning
                     )
+                    .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
                 }
 
-                ForEach(viewModel.visibleCategories(), id: \.self) { category in
-                    NavigationLink(value: SidebarSelection.category(category)) {
+                Section("Kategoriler") {
+                    NavigationLink(value: SidebarSelection.overview) {
                         SidebarCategoryLabel(
-                            title: category.sidebarTitle,
-                            systemImage: category.systemImage,
-                            byteTotal: viewModel.totalBytes(in: category),
-                            tint: tint(for: category)
+                            title: "Genel Bakış",
+                            systemImage: "square.grid.2x2",
+                            byteTotal: viewModel.selectedTotalBytes,
+                            tint: .accentColor
                         )
+                    }
+
+                    ForEach(viewModel.visibleCategories(), id: \.self) { category in
+                        NavigationLink(value: SidebarSelection.category(category)) {
+                            SidebarCategoryLabel(
+                                title: category.sidebarTitle,
+                                systemImage: category.systemImage,
+                                byteTotal: viewModel.totalBytes(in: category),
+                                tint: tint(for: category)
+                            )
+                        }
                     }
                 }
             }
+            .listStyle(.sidebar)
+
+            Divider()
+
+            Button {
+                viewModel.presentAbout()
+            } label: {
+                Label("CleanMac Hakkında", systemImage: "info.circle")
+                    .font(.subheadline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
         }
-        .listStyle(.sidebar)
         .navigationTitle("CleanMac")
     }
 

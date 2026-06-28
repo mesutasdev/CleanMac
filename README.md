@@ -75,4 +75,9 @@ Bu proje açık kaynak olarak paylaşılmaktadır. Katkılarınızı bekliyoruz.
 
 ## Yazar
 
-**Mesut As** — [LinkedIn](https://www.linkedin.com/in/mesutasdev)
+**Mesut As** — [mesutas.com](https://mesutas.com) · [TechAs.co](https://techas.co) · [LinkedIn](https://www.linkedin.com/in/mesutasdev)
+
+## Destek
+
+- [Buy Me a Coffee](https://buymeacoffee.com/mesutasdevw)
+- **EnPara** — Hesap Sahibi: Mesut As · IBAN: `TR51 0015 7000 0000 0088 1408 69` — açıklama: *CleanMac destek* (veya istediğiniz bir not)
