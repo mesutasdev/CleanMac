@@ -24,11 +24,7 @@ Manuel kurulum: CleanMac'i kapat → \`${APP_NAME}.app\` dosyasını Application
 Apple Developer ID ile imzalanmış ve notarize edilmiştir.
 
 ### Bu sürümde
-- **Yeni logo** — roket temalı marka kimliği (uygulama ikonu, menü çubuğu, Hakkında)
-- **English + Türkçe** — varsayılan İngilizce, cihaz diline göre otomatik seçim, bayraklı dil değiştirici
-- **Flutter otomatik keşif** — ~/projects, ~/dev, ~/code vb. yaygın klasörlerde pubspec.yaml arar
-- **Tek buton önerilen seçim** — Önerilenleri Seç / Kaldır toggle
-- **Yenile** butonu artık metin + ikon ile daha görünür
+- **Düzeltme:** Uygulama açılışında çökme giderildi (disk doluluk yüzdesi format hatası)
 
 ### Destek
 

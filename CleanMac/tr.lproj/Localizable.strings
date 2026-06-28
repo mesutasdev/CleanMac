@@ -54,7 +54,7 @@ Son build ve güncel cihaz sembolleri korunur.";
 "device.latest_ios" = "iOS %@ — diskteki en yüksek sürüm sembolleri";
 "device.preserved_ios" = "iOS %@ korunuyor — simülatör değil";
 "disk.free_label" = "boş";
-"disk.full_percent" = "%@%% dolu";
+"disk.full_percent" = "%d%% dolu";
 "disk.projection.both" = "Temizlik sonrası ~%@ boş alan (kalıcı: ~%@)";
 "disk.projection.single" = "Temizlik sonrası ~%@ boş alan";
 "disk.remaining" = "Kalan";

@@ -54,7 +54,7 @@ Last build and current device symbols are preserved.";
 "device.latest_ios" = "iOS %@ — highest version symbols on disk";
 "device.preserved_ios" = "iOS %@ preserved — not simulator";
 "disk.free_label" = "free";
-"disk.full_percent" = "%@%% full";
+"disk.full_percent" = "%d%% full";
 "disk.projection.both" = "After cleaning ~%@ free (permanent: ~%@)";
 "disk.projection.single" = "After cleaning ~%@ free";
 "disk.remaining" = "Free";

@@ -36,5 +36,9 @@ func L(_ key: String) -> String {
 }
 
 func L(_ key: String, _ arguments: CVarArg...) -> String {
-    String(format: BundleLocalization.localized(key), arguments: arguments)
+    let format = BundleLocalization.localized(key)
+    guard !arguments.isEmpty else { return format }
+    return withVaList(Array(arguments)) { pointer in
+        NSString(format: format, locale: Locale.current, arguments: pointer) as String
+    }
 }
