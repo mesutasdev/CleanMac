@@ -91,6 +91,23 @@ if [[ "${USE_DEVELOPER_ID:-0}" -eq 1 ]]; then
   echo ">> Notarizasyon (${NOTARY_PROFILE})"
   xcrun notarytool submit "$DMG_OUTPUT" --keychain-profile "$NOTARY_PROFILE" --wait
   xcrun stapler staple "$DMG_OUTPUT"
+  xcrun stapler validate "$DMG_OUTPUT"
+
+  VERIFY_MOUNT=$(hdiutil attach "$DMG_OUTPUT" -nobrowse -plist | plutil -extract system-entities.0.mount-point raw - 2>/dev/null || true)
+  if [[ -n "$VERIFY_MOUNT" && -d "$VERIFY_MOUNT/CleanMac.app" ]]; then
+    if ! spctl -a -t exec -- "$VERIFY_MOUNT/CleanMac.app" >/dev/null 2>&1; then
+      echo "HATA: CleanMac.app Gatekeeper doğrulaması başarısız" >&2
+      hdiutil detach "$VERIFY_MOUNT" -quiet 2>/dev/null || true
+      exit 1
+    fi
+    if ! spctl -a -t exec -- "$VERIFY_MOUNT/CleanMac'i Kur.app" >/dev/null 2>&1; then
+      echo "HATA: CleanMac'i Kur.app Gatekeeper doğrulaması başarısız" >&2
+      hdiutil detach "$VERIFY_MOUNT" -quiet 2>/dev/null || true
+      exit 1
+    fi
+    hdiutil detach "$VERIFY_MOUNT" -quiet
+    echo ">> Gatekeeper doğrulandı (CleanMac.app + CleanMac'i Kur.app)"
+  fi
 fi
 
 echo ">> Hazır: $DMG_OUTPUT"
