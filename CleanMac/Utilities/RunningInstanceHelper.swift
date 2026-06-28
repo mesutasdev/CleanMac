@@ -1,8 +1,6 @@
 import AppKit
 
 enum RunningInstanceHelper {
-    private static let executableName = "CleanMac"
-
     /// Güncelleme sırasında açık kalan eski CleanMac sürecini kapatır.
     static func terminateOtherInstances() {
         guard let bundleID = Bundle.main.bundleIdentifier else { return }

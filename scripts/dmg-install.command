@@ -12,30 +12,55 @@ if [[ ! -d "$APP" ]]; then
   exit 1
 fi
 
+# Yalnızca gerçek CleanMac.app sürecini bul (Cursor vb. eşleşmesin)
+cleanmac_pids() {
+  ps -ax -o pid=,command= | while read -r pid command; do
+    case "$command" in
+      */CleanMac.app/Contents/MacOS/CleanMac)
+        echo "$pid"
+        ;;
+    esac
+  done
+}
+
 cleanmac_is_running() {
-  pgrep -f "Contents/MacOS/CleanMac" >/dev/null 2>&1
+  [[ -n "$(cleanmac_pids)" ]]
+}
+
+request_graceful_quit() {
+  if command -v swift >/dev/null 2>&1; then
+    swift -e 'import Foundation; CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFNotificationName("com.cleanmac.app.installQuit" as CFString), nil, nil, true)' 2>/dev/null || true
+  fi
+  osascript -e "tell application id \"${BUNDLE_ID}\" to quit" 2>/dev/null || true
+  osascript -e 'tell application "CleanMac" to quit' 2>/dev/null || true
+}
+
+kill_cleanmac_processes() {
+  local pid
+  while read -r pid; do
+    [[ -n "$pid" ]] || continue
+    kill -TERM "$pid" 2>/dev/null || true
+  done < <(cleanmac_pids)
+  sleep 0.5
+  while read -r pid; do
+    [[ -n "$pid" ]] || continue
+    kill -KILL "$pid" 2>/dev/null || true
+  done < <(cleanmac_pids)
 }
 
 quit_cleanmac() {
-  # 1) Nazik kapatma
-  osascript -e "tell application id \"${BUNDLE_ID}\" to quit" 2>/dev/null || true
-  osascript -e 'tell application "CleanMac" to quit' 2>/dev/null || true
-  sleep 1
+  request_graceful_quit
+  sleep 1.5
 
-  # 2) SIGTERM
   local attempt
-  for attempt in {1..25}; do
+  for attempt in {1..20}; do
     cleanmac_is_running || return 0
-    pkill -f "Contents/MacOS/CleanMac" 2>/dev/null || true
-    sleep 0.2
+    kill_cleanmac_processes
+    sleep 0.25
   done
 
-  # 3) SIGKILL
-  pkill -9 -f "Contents/MacOS/CleanMac" 2>/dev/null || true
-  sleep 0.5
-
   if cleanmac_is_running; then
-    osascript -e 'display alert "CleanMac kapatılamadı" message "Menü çubuğundan CleanMac'"'"'den Çık deyin, sonra bu scripti tekrar çalıştırın." as critical'
+    osascript -e 'display alert "CleanMac kapatılamadı" message "⌘⌥Esc ile CleanMac'"'"'i zorla kapatın, sonra bu scripti tekrar çalıştırın." as critical'
     exit 1
   fi
 }
@@ -52,7 +77,7 @@ echo "   ✓ Kuruldu"
 
 echo "▶ CleanMac açılıyor..."
 sleep 0.5
-open -n "$TARGET"
+open "$TARGET"
 
 osascript -e 'display notification "CleanMac başarıyla kuruldu." with title "CleanMac Kurulum"' 2>/dev/null || true
 exit 0

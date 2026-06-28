@@ -2,8 +2,20 @@ import AppKit
 import SwiftUI
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    private var installQuitObserver: NSObjectProtocol?
+
     func applicationWillFinishLaunching(_ notification: Notification) {
         RunningInstanceHelper.terminateOtherInstances()
+    }
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        installQuitObserver = DistributedNotificationCenter.default().addObserver(
+            forName: .cleanMacInstallQuit,
+            object: nil,
+            queue: .main
+        ) { _ in
+            NSApplication.shared.terminate(nil)
+        }
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
