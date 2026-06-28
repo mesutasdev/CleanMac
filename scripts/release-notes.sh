@@ -22,10 +22,6 @@ Manuel kurulum: CleanMac'i kapat → \`${APP_NAME}.app\` dosyasını Application
 Apple Developer ID ile imzalanmış ve notarize edilmiştir.
 
 ### Bu sürümde
-- **CleanMac'i Kur.app** düzeltmesi: uygulama paketinin içine gömülü, DMG dışında da çalışır
-- **CleanMac'i Kur.app**: DMG'den tek tıkla kurulum, kurulum sonrası otomatik açılış
-- Açılışta ana pencere otomatik gösterilir
-- Sidebar'da **CleanMac Hakkında** butonu
-- Destek bilgileri: [Buy Me a Coffee](https://buymeacoffee.com/mesutasdevw), EnPara IBAN (Mesut As)
-- Geliştirici linkleri: [mesutas.com](https://mesutas.com) | [TechAs.co](https://techas.co)
+- Hakkında ekranı: içeriğe göre boyut, alttaki boş alan kaldırıldı
+- Açıklama metni küçültüldü, Destek ve Buy Me a Coffee yan yana
 EOF
