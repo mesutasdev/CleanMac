@@ -24,9 +24,7 @@ Manuel kurulum: CleanMac'i kapat → \`${APP_NAME}.app\` dosyasını Application
 Apple Developer ID ile imzalanmış ve notarize edilmiştir.
 
 ### Bu sürümde
-- **Yeni:** Açık / koyu / sistem görünüm modu (sidebar ve Hakkında ekranından seçilebilir)
-- **Yeni:** Açık ve koyu mod için ayrı roket ikonları (uygulama, Dock ve menü çubuğu)
-- **İyileştirme:** Seçili Alan kartındaki logo daha büyük gösteriliyor
+- **Düzeltme:** Uygulama içi güncellemede DMG dosyası açılamama hatası giderildi
 
 ### Destek
 

@@ -129,20 +129,22 @@ actor UpdateService {
         process.arguments = ["attach", "-nobrowse", "-plist", url.path]
 
         let output = Pipe()
+        let errorPipe = Pipe()
         process.standardOutput = output
-        process.standardError = Pipe()
+        process.standardError = errorPipe
 
         try process.run()
         process.waitUntilExit()
+
+        let data = output.fileHandleForReading.readDataToEndOfFile()
 
         guard process.terminationStatus == 0 else {
             throw UpdateError.mountFailed
         }
 
-        let data = output.fileHandleForReading.readDataToEndOfFile()
         guard
-            let plist = try PropertyListSerialization.propertyList(from: data, format: nil) as? [[String: Any]],
-            let entities = plist.first?["system-entities"] as? [[String: Any]]
+            let plist = try PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any],
+            let entities = plist["system-entities"] as? [[String: Any]]
         else {
             throw UpdateError.mountFailed
         }
