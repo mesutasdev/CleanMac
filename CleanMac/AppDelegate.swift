@@ -16,6 +16,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         ) { _ in
             NSApplication.shared.terminate(nil)
         }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            MainWindowController.show()
+        }
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {

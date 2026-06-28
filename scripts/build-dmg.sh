@@ -8,6 +8,8 @@ APP_NAME="CleanMac"
 VERSION="$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' CleanMac/Info.plist)"
 TEAM_ID="477K4S3LV2"
 BUILD_DIR="$ROOT/build"
+mkdir -p "$BUILD_DIR"
+touch "$BUILD_DIR/.metadata_never_index"
 DERIVED="$BUILD_DIR/DerivedData"
 ARCHIVE="$BUILD_DIR/CleanMac.xcarchive"
 APP_PATH="$ARCHIVE/Products/Applications/${APP_NAME}.app"
@@ -54,12 +56,18 @@ ditto "$APP_PATH" "$DMG_STAGING/${APP_NAME}.app"
 ln -sf /Applications "$DMG_STAGING/Applications"
 
 if [[ "${USE_DEVELOPER_ID:-0}" -eq 1 ]]; then
+  "$ROOT/scripts/create-installer-app.sh" "$DMG_STAGING" "$RESIGN_IDENTITY"
   cat > "$DMG_STAGING/KURULUM.txt" <<'EOF'
 CleanMac kurulumu
 
-1) Menü çubuğu → CleanMac'den Çık (açıksa kapatın)
-2) CleanMac.app dosyasını Applications klasörüne sürükleyin
-3) Uygulamayı açın
+ÖNERİLEN:
+  1) "CleanMac'i Kur.app" dosyasına çift tıklayın
+  2) Kurulum bitince CleanMac otomatik açılır
+
+Manuel:
+  1) CleanMac açıksa menü çubuğu → CleanMac'den Çık
+  2) CleanMac.app → Applications klasörüne sürükleyin
+  3) Uygulamayı açın
 EOF
 elif [[ "$RESIGN_IDENTITY" != "Developer ID Application" ]]; then
   cp "$CA_CRT" "$DMG_STAGING/CleanMac-Root-CA.crt"
@@ -76,6 +84,7 @@ EOF
 fi
 
 hdiutil create -volname "$APP_NAME" -srcfolder "$DMG_STAGING" -ov -format UDZO "$DMG_OUTPUT"
+rm -rf "$DMG_STAGING"
 
 if [[ "${USE_DEVELOPER_ID:-0}" -eq 1 ]]; then
   NOTARY_PROFILE="${NOTARY_PROFILE:-CleanMac-Notary}"

@@ -23,9 +23,9 @@ veya **[Releases](https://github.com/mesutasdev/CleanMac/releases/latest)** sayf
 
 1. [Releases](https://github.com/mesutasdev/CleanMac/releases/latest) sayfasından en son `.dmg` dosyasını indirin
 2. DMG'yi açın
-3. Açık CleanMac varsa menü çubuğundan **CleanMac'den Çık** deyin
-4. `CleanMac.app` dosyasını **Applications** klasörüne sürükleyin
-5. Uygulamayı açın
+3. **`CleanMac'i Kur.app`** dosyasına çift tıklayın — kurar ve otomatik açar
+
+Manuel: CleanMac'i kapatın → `CleanMac.app` → Applications → açın
 
 ## Özellikler
 

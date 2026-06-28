@@ -13,15 +13,17 @@ Geliştiriciler için Mac disk temizleyici — Xcode, Flutter, npm, Gradle cache
 ### Kurulum
 1. \`${APP_NAME}-${VERSION}.dmg\` dosyasını indir
 2. DMG'yi aç
-3. Açık CleanMac varsa menü çubuğundan **CleanMac'den Çık** de
-4. \`${APP_NAME}.app\` dosyasını **Applications** klasörüne sürükle
-5. Uygulamayı aç
+3. **\`CleanMac'i Kur.app\`** dosyasına çift tıkla — kurar ve otomatik açar
+
+Manuel kurulum: CleanMac'i kapat → \`${APP_NAME}.app\` dosyasını Applications'a sürükle → aç
 
 **Gereksinim:** macOS 13.0 (Ventura) veya üzeri
 
 Apple Developer ID ile imzalanmış ve notarize edilmiştir.
 
 ### Bu sürümde
+- **`CleanMac'i Kur.app`**: DMG'den tek tıkla kurulum, kurulum sonrası otomatik açılış
+- Açılışta ana pencere otomatik gösterilir
 - Sidebar'da **CleanMac Hakkında** butonu
 - Destek bilgileri: [Buy Me a Coffee](https://buymeacoffee.com/mesutasdevw), EnPara IBAN (Mesut As)
 - Geliştirici linkleri: [mesutas.com](https://mesutas.com) | [TechAs.co](https://techas.co)
