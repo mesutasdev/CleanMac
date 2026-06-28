@@ -5,13 +5,7 @@ struct AboutView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            Image("AppBrand")
-                .resizable()
-                .interpolation(.high)
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 96, height: 96)
-                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-                .shadow(radius: 8, y: 4)
+            BrandLogoView(size: 112, cornerRadius: 24)
 
             Text("CleanMac")
                 .font(.title.weight(.semibold))

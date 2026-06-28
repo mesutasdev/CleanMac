@@ -66,7 +66,7 @@ struct DiskUsageCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     private func diskStat(title: String, value: String, emphasized: Bool = false) -> some View {
