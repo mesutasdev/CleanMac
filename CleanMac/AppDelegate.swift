@@ -120,21 +120,39 @@ struct MainWindowConfigurator: NSViewRepresentable {
         let view = NSView(frame: .zero)
         DispatchQueue.main.async {
             guard let window = view.window else { return }
-            window.identifier = NSUserInterfaceItemIdentifier(MainWindowController.mainWindowIdentifier)
-            window.isReleasedWhenClosed = false
-            window.delegate = context.coordinator
+            context.coordinator.configureWindow(window)
             window.makeKeyAndOrderFront(nil)
         }
         return view
     }
 
-    func updateNSView(_ nsView: NSView, context: Context) {}
+    func updateNSView(_ nsView: NSView, context: Context) {
+        DispatchQueue.main.async {
+            guard let window = nsView.window else { return }
+            context.coordinator.configureWindow(window)
+        }
+    }
 
     func makeCoordinator() -> Coordinator {
         Coordinator()
     }
 
     final class Coordinator: NSObject, NSWindowDelegate {
+        private var appliedDefaultFrame = false
+
+        func configureWindow(_ window: NSWindow) {
+            window.identifier = NSUserInterfaceItemIdentifier(MainWindowController.mainWindowIdentifier)
+            window.isReleasedWhenClosed = false
+            window.delegate = self
+            window.contentMinSize = NSSize(width: 900, height: 640)
+
+            if !appliedDefaultFrame, window.frame.size.width < 400 || window.frame.size.height < 500 {
+                appliedDefaultFrame = true
+                window.setContentSize(NSSize(width: 1020, height: 680))
+                window.center()
+            }
+        }
+
         func windowShouldClose(_ sender: NSWindow) -> Bool {
             MainWindowController.hide(sender)
             return false

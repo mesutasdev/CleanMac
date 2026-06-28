@@ -11,7 +11,7 @@ struct ContentView: View {
         } detail: {
             DetailView(viewModel: viewModel)
         }
-        .frame(minWidth: 900, minHeight: 600)
+        .frame(minWidth: 900, minHeight: 640)
         .onAppear {
             viewModel.refreshDiskSpace()
         }

@@ -5,18 +5,16 @@ struct SidebarView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            List(selection: $viewModel.sidebarSelection) {
-                Section {
-                    SidebarSummaryCard(
-                        permanentBytes: viewModel.permanentReclaimBytes,
-                        temporaryBytes: viewModel.temporaryReclaimBytes,
-                        isScanning: viewModel.isScanning
-                    )
-                    .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                }
+            SidebarSummaryCard(
+                permanentBytes: viewModel.permanentReclaimBytes,
+                temporaryBytes: viewModel.temporaryReclaimBytes,
+                isScanning: viewModel.isScanning
+            )
+            .padding(.horizontal, 8)
+            .padding(.top, 8)
+            .padding(.bottom, 4)
 
+            List(selection: $viewModel.sidebarSelection) {
                 Section("Kategoriler") {
                     NavigationLink(value: SidebarSelection.overview) {
                         SidebarCategoryLabel(
@@ -77,22 +75,23 @@ private struct SidebarSummaryCard: View {
     let isScanning: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .center, spacing: 12) {
-                BrandLogoView(size: 52, cornerRadius: 14)
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .center, spacing: 10) {
+                BrandLogoView(size: 44, cornerRadius: 12)
 
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text("Seçili Alan")
-                        .font(.subheadline)
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                     if isScanning {
                         ProgressView()
-                            .controlSize(.regular)
+                            .controlSize(.small)
                     } else {
                         Text(ByteCountFormatter.string(from: permanentBytes))
-                            .font(.title.weight(.semibold))
+                            .font(.title3.weight(.semibold))
                             .monospacedDigit()
-                            .fixedSize(horizontal: false, vertical: true)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.85)
                     }
                 }
             }
@@ -100,21 +99,22 @@ private struct SidebarSummaryCard: View {
             if temporaryBytes > 0 {
                 Label {
                     Text("\(ByteCountFormatter.string(from: temporaryBytes)) geçici (build'de geri gelir)")
-                        .font(.subheadline)
+                        .font(.caption)
+                        .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
                 } icon: {
                     Image(systemName: "arrow.triangle.2.circlepath")
-                        .font(.caption)
+                        .font(.caption2)
                 }
                 .foregroundStyle(.orange)
             } else if !isScanning {
                 Text("Kalıcı disk tasarrufu")
-                    .font(.subheadline)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
+        .padding(12)
         .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }

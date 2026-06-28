@@ -56,24 +56,23 @@ struct AboutView: View {
                             supportLabel("Banka")
                             supportValue("EnPara")
                         }
-                    }
+                        GridRow(alignment: .firstTextBaseline) {
+                            supportLabel("IBAN")
+                            HStack(spacing: 4) {
+                                Text(iban)
+                                    .font(.system(.caption2, design: .monospaced))
+                                    .lineLimit(1)
+                                    .textSelection(.enabled)
 
-                    VStack(alignment: .leading, spacing: 4) {
-                        supportLabel("IBAN")
-                        HStack(alignment: .top, spacing: 6) {
-                            Text(iban)
-                                .font(.system(.caption, design: .monospaced))
-                                .fixedSize(horizontal: false, vertical: true)
-                                .textSelection(.enabled)
-
-                            Button {
-                                copyToClipboard(iban.replacingOccurrences(of: " ", with: ""))
-                            } label: {
-                                Image(systemName: "doc.on.doc")
-                                    .font(.caption)
+                                Button {
+                                    copyToClipboard(iban.replacingOccurrences(of: " ", with: ""))
+                                } label: {
+                                    Image(systemName: "doc.on.doc")
+                                        .font(.caption2)
+                                }
+                                .buttonStyle(.borderless)
+                                .help("IBAN'ı kopyala")
                             }
-                            .buttonStyle(.borderless)
-                            .help("IBAN'ı kopyala")
                         }
                     }
 
