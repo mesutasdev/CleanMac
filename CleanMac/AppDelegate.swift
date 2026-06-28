@@ -2,12 +2,6 @@ import AppKit
 import SwiftUI
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    func applicationDidFinishLaunching(_ notification: Notification) {
-        DispatchQueue.main.async {
-            MainWindowController.show()
-        }
-    }
-
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         false
     }
@@ -21,16 +15,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 enum MainWindowController {
+    static let mainWindowIdentifier = "cleanmac-main-window"
+
+    private static var openHandler: (() -> Void)?
+    private static var pendingLaunchShow = true
+
+    static func registerOpenHandler(_ handler: @escaping () -> Void) {
+        openHandler = handler
+
+        guard pendingLaunchShow else { return }
+        pendingLaunchShow = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            show()
+        }
+    }
+
     static func show() {
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
-
-        if let window = mainWindow {
-            window.makeKeyAndOrderFront(nil)
-            return
-        }
-
-        NotificationCenter.default.post(name: .cleanMacShowWindow, object: nil)
+        openHandler?()
+        presentMainWindow(retry: 0)
     }
 
     static func hide(_ window: NSWindow) {
@@ -38,10 +42,27 @@ enum MainWindowController {
     }
 
     static var mainWindow: NSWindow? {
-        NSApp.windows.first { $0.identifier?.rawValue == mainWindowIdentifier }
+        NSApp.windows.first { window in
+            window.identifier?.rawValue == mainWindowIdentifier
+                || window.title == "CleanMac"
+        }
     }
 
-    static let mainWindowIdentifier = "cleanmac-main-window"
+    private static func presentMainWindow(retry: Int) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            if let window = mainWindow {
+                window.identifier = NSUserInterfaceItemIdentifier(mainWindowIdentifier)
+                window.isReleasedWhenClosed = false
+                window.makeKeyAndOrderFront(nil)
+                NSApp.activate(ignoringOtherApps: true)
+                return
+            }
+
+            guard retry < 12 else { return }
+            openHandler?()
+            presentMainWindow(retry: retry + 1)
+        }
+    }
 }
 
 struct MainWindowConfigurator: NSViewRepresentable {
@@ -52,6 +73,7 @@ struct MainWindowConfigurator: NSViewRepresentable {
             window.identifier = NSUserInterfaceItemIdentifier(MainWindowController.mainWindowIdentifier)
             window.isReleasedWhenClosed = false
             window.delegate = context.coordinator
+            window.makeKeyAndOrderFront(nil)
         }
         return view
     }

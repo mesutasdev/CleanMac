@@ -4,18 +4,12 @@ import SwiftUI
 struct CleanMacApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var viewModel = CleanMacViewModel()
-    @Environment(\.openWindow) private var openWindow
 
     var body: some Scene {
         MenuBarExtra {
             MenuBarView(viewModel: viewModel)
         } label: {
-            Image("AppLogo")
-                .renderingMode(.template)
-                .resizable()
-                .interpolation(.high)
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 18, height: 18)
+            MenuBarLabel()
         }
         .menuBarExtraStyle(.menu)
 
@@ -23,12 +17,6 @@ struct CleanMacApp: App {
             ContentView(viewModel: viewModel)
                 .background {
                     MainWindowConfigurator()
-                }
-                .onReceive(NotificationCenter.default.publisher(for: .cleanMacShowWindow)) { _ in
-                    openWindow(id: "main")
-                    DispatchQueue.main.async {
-                        MainWindowController.show()
-                    }
                 }
         }
         .defaultSize(width: 1020, height: 680)
