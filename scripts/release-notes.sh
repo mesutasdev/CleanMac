@@ -28,4 +28,11 @@ Apple Developer ID ile imzalanmış ve notarize edilmiştir.
 - Silinecek dosyaların konumu (path) listeleniyor, Finder'da açılabilir
 - Sidebar GB tutarlılığı, simülatör gerçek disk ölçümü, npm yalnızca _cacache
 - Açılış donması giderildi, kısmi silme uyarıları eklendi
+
+### Destek
+
+CleanMac ücretsiz ve açık kaynaklıdır. Beğendiysen geliştirmeye destek olabilirsin — zorunlu değil, minnet duyarım.
+
+- [Buy Me a Coffee](https://buymeacoffee.com/mesutasdevw)
+- **EnPara** — Hesap Sahibi: Mesut As · IBAN: \`TR51 0015 7000 0000 0088 1408 69\` · Açıklama: *CleanMac destek* (veya istediğiniz bir not)
 EOF
