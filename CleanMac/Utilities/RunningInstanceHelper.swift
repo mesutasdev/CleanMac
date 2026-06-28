@@ -1,6 +1,8 @@
 import AppKit
 
 enum RunningInstanceHelper {
+    private static let executableName = "CleanMac"
+
     /// Güncelleme sırasında açık kalan eski CleanMac sürecini kapatır.
     static func terminateOtherInstances() {
         guard let bundleID = Bundle.main.bundleIdentifier else { return }
@@ -15,7 +17,7 @@ enum RunningInstanceHelper {
             app.terminate()
         }
 
-        for _ in 0..<30 {
+        for _ in 0..<40 {
             if others.allSatisfy(\.isTerminated) { return }
             Thread.sleep(forTimeInterval: 0.1)
         }

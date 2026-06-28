@@ -5,41 +5,54 @@ set -euo pipefail
 DIR="$(cd "$(dirname "$0")" && pwd)"
 APP="$DIR/CleanMac.app"
 TARGET="/Applications/CleanMac.app"
-APP_NAME="CleanMac"
+BUNDLE_ID="com.cleanmac.app"
 
 if [[ ! -d "$APP" ]]; then
-  osascript -e "display alert \"CleanMac.app bulunamadı\" message \"Bu script DMG içinden çalıştırılmalı.\" as critical"
+  osascript -e 'display alert "CleanMac.app bulunamadı" message "Bu script DMG içinden çalıştırılmalı." as critical'
   exit 1
 fi
 
-quit_cleanmac() {
-  osascript -e "tell application \"${APP_NAME}\" to quit" 2>/dev/null || true
+cleanmac_is_running() {
+  pgrep -f "Contents/MacOS/CleanMac" >/dev/null 2>&1
+}
 
-  local i
-  for i in {1..20}; do
-    pgrep -x "$APP_NAME" >/dev/null || return 0
-    sleep 0.25
+quit_cleanmac() {
+  # 1) Nazik kapatma
+  osascript -e "tell application id \"${BUNDLE_ID}\" to quit" 2>/dev/null || true
+  osascript -e 'tell application "CleanMac" to quit' 2>/dev/null || true
+  sleep 1
+
+  # 2) SIGTERM
+  local attempt
+  for attempt in {1..25}; do
+    cleanmac_is_running || return 0
+    pkill -f "Contents/MacOS/CleanMac" 2>/dev/null || true
+    sleep 0.2
   done
 
-  pkill -x "$APP_NAME" 2>/dev/null || true
+  # 3) SIGKILL
+  pkill -9 -f "Contents/MacOS/CleanMac" 2>/dev/null || true
   sleep 0.5
 
-  if pgrep -x "$APP_NAME" >/dev/null; then
-    pkill -9 -x "$APP_NAME" 2>/dev/null || true
-    sleep 0.3
+  if cleanmac_is_running; then
+    osascript -e 'display alert "CleanMac kapatılamadı" message "Menü çubuğundan CleanMac'"'"'den Çık deyin, sonra bu scripti tekrar çalıştırın." as critical'
+    exit 1
   fi
 }
 
-echo "▶ ${APP_NAME} kapatılıyor..."
+echo "▶ CleanMac kapatılıyor..."
 quit_cleanmac
+echo "   ✓ Kapatıldı"
 
-echo "▶ ${APP_NAME} kuruluyor..."
+echo "▶ CleanMac kuruluyor..."
 rm -rf "$TARGET"
 ditto "$APP" "$TARGET"
+xattr -cr "$TARGET" 2>/dev/null || true
+echo "   ✓ Kuruldu"
 
-echo "▶ ${APP_NAME} açılıyor..."
-open "$TARGET"
+echo "▶ CleanMac açılıyor..."
+sleep 0.5
+open -n "$TARGET"
 
-osascript -e "display notification \"CleanMac başarıyla kuruldu.\" with title \"CleanMac Kurulum\"" 2>/dev/null || true
-
+osascript -e 'display notification "CleanMac başarıyla kuruldu." with title "CleanMac Kurulum"' 2>/dev/null || true
 exit 0

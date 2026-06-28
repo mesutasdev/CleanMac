@@ -6,6 +6,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         RunningInstanceHelper.terminateOtherInstances()
     }
 
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        .terminateNow
+    }
+
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         false
     }
