@@ -9,14 +9,16 @@ struct AppearanceToggleView: View {
                 Button {
                     appearanceManager.selectedAppearance = appearance
                 } label: {
-                    HStack(spacing: 4) {
+                    VStack(spacing: 4) {
                         Image(systemName: appearance.icon)
                             .font(.caption.weight(.semibold))
                         Text(L(appearance.titleKey))
                             .font(.caption.weight(.medium))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.85)
                     }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 6)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 8)
                     .frame(maxWidth: .infinity)
                     .background(
                         appearanceManager.selectedAppearance == appearance

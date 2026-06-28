@@ -14,7 +14,7 @@ struct ContentView: View {
                 languageManager: languageManager,
                 appearanceManager: appearanceManager
             )
-                .navigationSplitViewColumnWidth(min: 240, ideal: 270, max: 320)
+                .navigationSplitViewColumnWidth(min: 280, ideal: 300, max: 360)
         } detail: {
             DetailView(viewModel: viewModel)
         }

@@ -45,13 +45,13 @@ struct SidebarView: View {
             Divider()
 
             AppearanceToggleView(appearanceManager: appearanceManager)
-                .padding(.horizontal, 12)
+                .padding(.horizontal, 10)
                 .padding(.top, 10)
                 .padding(.bottom, 6)
                 .background(.bar)
 
             LanguageToggleView(languageManager: languageManager)
-                .padding(.horizontal, 12)
+                .padding(.horizontal, 10)
                 .padding(.top, 6)
                 .padding(.bottom, 10)
                 .background(.bar)
