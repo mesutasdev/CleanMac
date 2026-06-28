@@ -6,25 +6,37 @@ struct CleanMacApp: App {
     @StateObject private var viewModel = CleanMacViewModel()
     @StateObject private var updateManager = UpdateManager()
     @StateObject private var languageManager = LanguageManager.shared
+    @StateObject private var appearanceManager = AppearanceManager.shared
+
+    private var uiRefreshToken: String {
+        "\(languageManager.refreshToken)-\(appearanceManager.refreshToken)"
+    }
 
     var body: some Scene {
         MenuBarExtra {
             MenuBarView(viewModel: viewModel, updateManager: updateManager)
-                .id(languageManager.refreshToken)
+                .preferredColorScheme(appearanceManager.preferredColorScheme)
+                .id(uiRefreshToken)
         } label: {
             MenuBarLabel()
         }
         .menuBarExtraStyle(.menu)
 
         Window(L("app.name"), id: "main") {
-            ContentView(viewModel: viewModel, updateManager: updateManager, languageManager: languageManager)
+            ContentView(
+                viewModel: viewModel,
+                updateManager: updateManager,
+                languageManager: languageManager,
+                appearanceManager: appearanceManager
+            )
                 .background {
                     MainWindowConfigurator()
                 }
                 .onAppear {
                     appDelegate.updateManager = updateManager
                 }
-                .id(languageManager.refreshToken)
+                .preferredColorScheme(appearanceManager.preferredColorScheme)
+                .id(uiRefreshToken)
         }
         .defaultSize(width: 1020, height: 800)
         .windowResizability(.contentMinSize)

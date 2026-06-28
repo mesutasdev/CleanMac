@@ -4,11 +4,16 @@ struct ContentView: View {
     @ObservedObject var viewModel: CleanMacViewModel
     @ObservedObject var updateManager: UpdateManager
     @ObservedObject var languageManager: LanguageManager
+    @ObservedObject var appearanceManager: AppearanceManager
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
 
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
-            SidebarView(viewModel: viewModel, languageManager: languageManager)
+            SidebarView(
+                viewModel: viewModel,
+                languageManager: languageManager,
+                appearanceManager: appearanceManager
+            )
                 .navigationSplitViewColumnWidth(min: 240, ideal: 270, max: 320)
         } detail: {
             DetailView(viewModel: viewModel)
@@ -50,7 +55,12 @@ struct ContentView: View {
             Text(confirmationMessage)
         }
         .sheet(isPresented: $viewModel.showAbout) {
-            AboutView(updateManager: updateManager, languageManager: languageManager)
+            AboutView(
+                updateManager: updateManager,
+                languageManager: languageManager,
+                appearanceManager: appearanceManager
+            )
+            .preferredColorScheme(appearanceManager.preferredColorScheme)
         }
     }
 
@@ -68,5 +78,10 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView(viewModel: CleanMacViewModel(), updateManager: UpdateManager(), languageManager: LanguageManager.shared)
+    ContentView(
+        viewModel: CleanMacViewModel(),
+        updateManager: UpdateManager(),
+        languageManager: LanguageManager.shared,
+        appearanceManager: AppearanceManager.shared
+    )
 }

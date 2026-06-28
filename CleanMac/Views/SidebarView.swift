@@ -3,6 +3,7 @@ import SwiftUI
 struct SidebarView: View {
     @ObservedObject var viewModel: CleanMacViewModel
     @ObservedObject var languageManager: LanguageManager
+    @ObservedObject var appearanceManager: AppearanceManager
 
     var body: some View {
         VStack(spacing: 0) {
@@ -43,9 +44,16 @@ struct SidebarView: View {
 
             Divider()
 
+            AppearanceToggleView(appearanceManager: appearanceManager)
+                .padding(.horizontal, 12)
+                .padding(.top, 10)
+                .padding(.bottom, 6)
+                .background(.bar)
+
             LanguageToggleView(languageManager: languageManager)
                 .padding(.horizontal, 12)
-                .padding(.vertical, 10)
+                .padding(.top, 6)
+                .padding(.bottom, 10)
                 .background(.bar)
 
             Divider()
@@ -88,7 +96,7 @@ private struct SidebarSummaryCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .center, spacing: 10) {
-                BrandLogoView(size: 44, cornerRadius: 12)
+                BrandLogoView(size: 64, cornerRadius: 16)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(L("sidebar.selected_space"))

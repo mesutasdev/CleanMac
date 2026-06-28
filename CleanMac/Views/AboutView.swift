@@ -4,6 +4,7 @@ import SwiftUI
 struct AboutView: View {
     @ObservedObject var updateManager: UpdateManager
     @ObservedObject var languageManager: LanguageManager
+    @ObservedObject var appearanceManager: AppearanceManager
     @Environment(\.dismiss) private var dismiss
 
     private let iban = "TR51 0015 7000 0000 0088 1408 69"
@@ -18,6 +19,8 @@ struct AboutView: View {
             Text(L("about.version", Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+
+            AppearanceToggleView(appearanceManager: appearanceManager)
 
             LanguageToggleView(languageManager: languageManager)
 

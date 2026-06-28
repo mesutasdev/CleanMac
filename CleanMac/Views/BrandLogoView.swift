@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct BrandLogoView: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     var size: CGFloat = 48
     var cornerRadius: CGFloat = 14
 
@@ -13,8 +15,16 @@ struct BrandLogoView: View {
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .strokeBorder(.white.opacity(0.08), lineWidth: 1)
+                    .strokeBorder(borderColor, lineWidth: 1)
             }
-            .shadow(color: .black.opacity(0.18), radius: 6, y: 3)
+            .shadow(color: shadowColor, radius: 6, y: 3)
+    }
+
+    private var borderColor: Color {
+        colorScheme == .dark ? .white.opacity(0.08) : .black.opacity(0.06)
+    }
+
+    private var shadowColor: Color {
+        colorScheme == .dark ? .black.opacity(0.18) : .black.opacity(0.12)
     }
 }
