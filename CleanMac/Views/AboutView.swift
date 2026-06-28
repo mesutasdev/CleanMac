@@ -16,7 +16,7 @@ struct AboutView: View {
             Text("CleanMac")
                 .font(.title.weight(.semibold))
 
-            Text("Sürüm 1.0")
+            Text("Sürüm \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
