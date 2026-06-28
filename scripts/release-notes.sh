@@ -1,8 +1,8 @@
 #!/bin/bash
 # Standart GitHub Release notları — publish-github-release.sh tarafından kullanılır.
-# Kullanım: ./scripts/release-notes.sh 1.0.8
+# Kullanım: ./scripts/release-notes.sh 1.0.13
 
-VERSION="${1:?Sürüm gerekli, örn: 1.0.8}"
+VERSION="${1:?Sürüm gerekli, örn: 1.0.13}"
 APP_NAME="CleanMac"
 
 cat <<EOF
@@ -13,11 +13,9 @@ Geliştiriciler için Mac disk temizleyici — Xcode, Flutter, npm, Gradle cache
 ### Kurulum
 1. \`${APP_NAME}-${VERSION}.dmg\` dosyasını indir
 2. DMG'yi aç
-3. **\`CleanMac Kur.command\`** dosyasına çift tıkla
-
-Kurulum scripti açık olan eski sürümü otomatik kapatır, Applications'a kurar ve yeni sürümü açar.
-
-**Manuel kurulum:** Önce CleanMac'i kapat, sonra \`${APP_NAME}.app\` dosyasını Applications'a sürükle.
+3. Açık CleanMac varsa menü çubuğundan **CleanMac'den Çık** de
+4. \`${APP_NAME}.app\` dosyasını **Applications** klasörüne sürükle
+5. Uygulamayı aç
 
 **Gereksinim:** macOS 13.0 (Ventura) veya üzeri
 
