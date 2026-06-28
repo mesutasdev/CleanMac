@@ -22,5 +22,5 @@ Manuel kurulum: CleanMac'i kapat → \`${APP_NAME}.app\` dosyasını Application
 Apple Developer ID ile imzalanmış ve notarize edilmiştir.
 
 ### Bu sürümde
-- Varsayılan pencere yüksekliği 720px (1020×720)
+- Varsayılan pencere yüksekliği 800px (1020×800)
 EOF

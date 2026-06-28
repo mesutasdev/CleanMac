@@ -19,7 +19,7 @@ struct CleanMacApp: App {
                     MainWindowConfigurator()
                 }
         }
-        .defaultSize(width: 1020, height: 720)
+        .defaultSize(width: 1020, height: 800)
         .windowResizability(.contentMinSize)
         .windowToolbarStyle(.unified(showsTitle: true))
         .commands {

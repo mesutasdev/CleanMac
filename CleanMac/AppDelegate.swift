@@ -138,7 +138,7 @@ struct MainWindowConfigurator: NSViewRepresentable {
     }
 
     final class Coordinator: NSObject, NSWindowDelegate {
-        private static let defaultSize = NSSize(width: 1020, height: 720)
+        private static let defaultSize = NSSize(width: 1020, height: 800)
         private var appliedDefaultFrame = false
         private var userDidResize = false
         private var suppressResizeTracking = false
