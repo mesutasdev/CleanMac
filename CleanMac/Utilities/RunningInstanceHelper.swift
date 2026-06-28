@@ -15,10 +15,15 @@ enum RunningInstanceHelper {
             app.terminate()
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            for app in others where !app.isTerminated {
-                app.forceTerminate()
-            }
+        for _ in 0..<30 {
+            if others.allSatisfy(\.isTerminated) { return }
+            Thread.sleep(forTimeInterval: 0.1)
         }
+
+        for app in others where !app.isTerminated {
+            app.forceTerminate()
+        }
+
+        Thread.sleep(forTimeInterval: 0.3)
     }
 }

@@ -51,9 +51,24 @@ echo ">> DMG"
 rm -rf "$DMG_STAGING" "$DMG_OUTPUT"
 mkdir -p "$DMG_STAGING"
 ditto "$APP_PATH" "$DMG_STAGING/${APP_NAME}.app"
+cp "$ROOT/scripts/dmg-install.command" "$DMG_STAGING/CleanMac Kur.command"
+chmod +x "$DMG_STAGING/CleanMac Kur.command"
 ln -sf /Applications "$DMG_STAGING/Applications"
 
-if [[ "$RESIGN_IDENTITY" != "Developer ID Application" ]]; then
+if [[ "${USE_DEVELOPER_ID:-0}" -eq 1 ]]; then
+  cat > "$DMG_STAGING/KURULUM.txt" <<'EOF'
+CleanMac kurulumu
+
+ÖNERİLEN (eski sürüm açık olsa bile çalışır):
+  1) "CleanMac Kur.command" dosyasına çift tıklayın
+  2) Kurulum bitince uygulama otomatik açılır
+
+Manuel kurulum:
+  1) Önce CleanMac'i tamamen kapatın (menü çubuğu → CleanMac'den Çık)
+  2) CleanMac.app → Applications klasörüne sürükleyin
+  3) Uygulamayı açın
+EOF
+elif [[ "$RESIGN_IDENTITY" != "Developer ID Application" ]]; then
   cp "$CA_CRT" "$DMG_STAGING/CleanMac-Root-CA.crt"
   cat > "$DMG_STAGING/KURULUM.txt" <<'EOF'
 CleanMac kurulumu
