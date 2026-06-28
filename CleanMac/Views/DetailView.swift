@@ -5,15 +5,14 @@ struct DetailView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if !(viewModel.isScanning && !viewModel.hasScanned) {
-                SelectionActionsBar(
-                    selectedBytes: viewModel.selectedTotalBytes,
-                    isDisabled: viewModel.isScanning || viewModel.isCleaning,
-                    onSelectRecommended: { viewModel.selectRecommended() },
-                    onDeselectAll: { viewModel.selectAll(false) },
-                    onClean: { viewModel.requestClean() }
-                )
-            }
+            SelectionActionsBar(
+                selectedBytes: viewModel.selectedTotalBytes,
+                isDisabled: viewModel.isScanning || viewModel.isCleaning,
+                onSelectRecommended: { viewModel.selectRecommended() },
+                onDeselectAll: { viewModel.selectAll(false) },
+                onClean: { viewModel.requestClean() }
+            )
+            .opacity(viewModel.isScanning && !viewModel.hasScanned ? 0.55 : 1)
 
             List {
             if viewModel.sidebarSelection == .overview {
@@ -152,6 +151,7 @@ private struct SelectionActionsBar: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
+        .frame(minHeight: 52, maxHeight: 52)
         .background(.regularMaterial)
         .overlay(alignment: .bottom) { Divider() }
     }

@@ -22,7 +22,7 @@ Manuel kurulum: CleanMac'i kapat → \`${APP_NAME}.app\` dosyasını Application
 Apple Developer ID ile imzalanmış ve notarize edilmiştir.
 
 ### Bu sürümde
-- Sidebar özet kartı düzeltildi, kategorilerin üzerine binmiyor
-- Varsayılan pencere boyutu 1020×680, Hakkında butonu görünür
-- IBAN tek satırda, kopya ikonu ile
+- Tarama bitince pencere ve sidebar boyutu sabit kalır
+- Özet kartı ve kategori satırları sabit yükseklikte
+- Üst aksiyon çubuğu taramada da yer kaplar, layout sıçramaz
 EOF

@@ -74,46 +74,61 @@ private struct SidebarSummaryCard: View {
     let temporaryBytes: Int64
     let isScanning: Bool
 
+    private let valueRowHeight: CGFloat = 18
+    private let captionRowHeight: CGFloat = 16
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .center, spacing: 10) {
                 BrandLogoView(size: 44, cornerRadius: 12)
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text("Seçili Alan")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    if isScanning {
-                        ProgressView()
-                            .controlSize(.small)
-                    } else {
-                        Text(ByteCountFormatter.string(from: permanentBytes))
-                            .font(.title3.weight(.semibold))
+
+                    ZStack(alignment: .leading) {
+                        Text("999,99 GB")
+                            .font(.subheadline.weight(.semibold))
                             .monospacedDigit()
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.85)
+                            .hidden()
+
+                        if isScanning {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Text(ByteCountFormatter.string(from: permanentBytes))
+                                .font(.subheadline.weight(.semibold))
+                                .monospacedDigit()
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+                        }
                     }
+                    .frame(height: valueRowHeight, alignment: .leading)
                 }
             }
 
-            if temporaryBytes > 0 {
-                Label {
-                    Text("\(ByteCountFormatter.string(from: temporaryBytes)) geçici (build'de geri gelir)")
-                        .font(.caption)
-                        .lineLimit(2)
-                        .fixedSize(horizontal: false, vertical: true)
-                } icon: {
-                    Image(systemName: "arrow.triangle.2.circlepath")
-                        .font(.caption2)
+            Group {
+                if isScanning {
+                    Text("Taranıyor…")
+                } else if temporaryBytes > 0 {
+                    Label {
+                        Text("\(ByteCountFormatter.string(from: temporaryBytes)) geçici")
+                            .lineLimit(1)
+                    } icon: {
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                            .font(.caption2)
+                    }
+                    .foregroundStyle(.orange)
+                } else {
+                    Text("Kalıcı disk tasarrufu")
+                        .foregroundStyle(.secondary)
                 }
-                .foregroundStyle(.orange)
-            } else if !isScanning {
-                Text("Kalıcı disk tasarrufu")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
+            .font(.caption)
+            .frame(height: captionRowHeight, alignment: .leading)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, minHeight: 88, maxHeight: 88, alignment: .leading)
         .padding(12)
         .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
@@ -138,11 +153,10 @@ private struct SidebarCategoryLabel: View {
                 Text(title)
                     .fixedSize(horizontal: false, vertical: true)
 
-                if byteTotal > 0 {
-                    Text(ByteCountFormatter.string(from: byteTotal))
-                        .font(.caption.monospacedDigit())
-                        .foregroundStyle(.secondary)
-                }
+                Text(byteTotal > 0 ? ByteCountFormatter.string(from: byteTotal) : " ")
+                    .font(.caption.monospacedDigit())
+                    .foregroundStyle(byteTotal > 0 ? Color.secondary : Color.clear)
+                    .frame(height: 14, alignment: .leading)
             }
         }
     }

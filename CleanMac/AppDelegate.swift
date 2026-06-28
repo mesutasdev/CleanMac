@@ -138,7 +138,10 @@ struct MainWindowConfigurator: NSViewRepresentable {
     }
 
     final class Coordinator: NSObject, NSWindowDelegate {
+        private static let defaultSize = NSSize(width: 1020, height: 680)
         private var appliedDefaultFrame = false
+        private var userDidResize = false
+        private var suppressResizeTracking = false
 
         func configureWindow(_ window: NSWindow) {
             window.identifier = NSUserInterfaceItemIdentifier(MainWindowController.mainWindowIdentifier)
@@ -146,11 +149,31 @@ struct MainWindowConfigurator: NSViewRepresentable {
             window.delegate = self
             window.contentMinSize = NSSize(width: 900, height: 640)
 
-            if !appliedDefaultFrame, window.frame.size.width < 400 || window.frame.size.height < 500 {
+            if !appliedDefaultFrame {
                 appliedDefaultFrame = true
-                window.setContentSize(NSSize(width: 1020, height: 680))
+                applyDefaultSize(to: window, center: true)
+            } else if !userDidResize {
+                let size = window.contentLayoutRect.size
+                if abs(size.width - Self.defaultSize.width) > 2 || abs(size.height - Self.defaultSize.height) > 2 {
+                    applyDefaultSize(to: window, center: false)
+                }
+            }
+        }
+
+        private func applyDefaultSize(to window: NSWindow, center: Bool) {
+            suppressResizeTracking = true
+            window.setContentSize(Self.defaultSize)
+            if center {
                 window.center()
             }
+            DispatchQueue.main.async { [weak self] in
+                self?.suppressResizeTracking = false
+            }
+        }
+
+        func windowDidResize(_ notification: Notification) {
+            guard !suppressResizeTracking, appliedDefaultFrame else { return }
+            userDidResize = true
         }
 
         func windowShouldClose(_ sender: NSWindow) -> Bool {
