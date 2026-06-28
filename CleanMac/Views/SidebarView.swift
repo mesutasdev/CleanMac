@@ -58,20 +58,20 @@ private struct SidebarSummaryCard: View {
     let isScanning: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top, spacing: 12) {
-                BrandLogoView(size: 48, cornerRadius: 14)
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .center, spacing: 14) {
+                BrandLogoView(size: 64, cornerRadius: 16)
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text("Seçili Alan")
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
                     if isScanning {
                         ProgressView()
-                            .controlSize(.small)
+                            .controlSize(.regular)
                     } else {
                         Text(ByteCountFormatter.string(from: permanentBytes))
-                            .font(.title2.weight(.semibold))
+                            .font(.title.weight(.semibold))
                             .monospacedDigit()
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -81,22 +81,22 @@ private struct SidebarSummaryCard: View {
             if temporaryBytes > 0 {
                 Label {
                     Text("\(ByteCountFormatter.string(from: temporaryBytes)) geçici (build'de geri gelir)")
-                        .font(.caption)
+                        .font(.subheadline)
                         .fixedSize(horizontal: false, vertical: true)
                 } icon: {
                     Image(systemName: "arrow.triangle.2.circlepath")
-                        .font(.caption2)
+                        .font(.caption)
                 }
                 .foregroundStyle(.orange)
             } else if !isScanning {
                 Text("Kalıcı disk tasarrufu")
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .padding(16)
+        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }
 

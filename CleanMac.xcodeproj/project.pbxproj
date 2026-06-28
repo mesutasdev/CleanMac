@@ -31,6 +31,7 @@
 		A1000001000000000000001A /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000001B /* MenuBarView.swift */; };
 		A1000001000000000000001B /* MenuBarLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000001C /* MenuBarLabel.swift */; };
 		A1000001000000000000001C /* BrandLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000001D /* BrandLogoView.swift */; };
+		A1000001000000000000001D /* RunningInstanceHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000001E /* RunningInstanceHelper.swift */; };
 		A1000001000000000000000F /* FlutterBuildHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000019 /* FlutterBuildHelper.swift */; };
 		A1000001000000000000000B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000000B /* Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -61,6 +62,7 @@
 		A2000001000000000000001B /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
 		A2000001000000000000001C /* MenuBarLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarLabel.swift; sourceTree = "<group>"; };
 		A2000001000000000000001D /* BrandLogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandLogoView.swift; sourceTree = "<group>"; };
+		A2000001000000000000001E /* RunningInstanceHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningInstanceHelper.swift; sourceTree = "<group>"; };
 		A2000001000000000000000B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A2000001000000000000000C /* CleanMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CleanMac.entitlements; sourceTree = "<group>"; };
 		A2000001000000000000000D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -165,6 +167,7 @@
 				A20000010000000000000019 /* FlutterBuildHelper.swift */,
 				A20000010000000000000010 /* DeviceSupportHelper.swift */,
 				A20000010000000000000016 /* CleanMacNotifications.swift */,
+				A2000001000000000000001E /* RunningInstanceHelper.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -255,6 +258,7 @@
 				A1000001000000000000001A /* MenuBarView.swift in Sources */,
 				A1000001000000000000001B /* MenuBarLabel.swift in Sources */,
 				A1000001000000000000001C /* BrandLogoView.swift in Sources */,
+				A1000001000000000000001D /* RunningInstanceHelper.swift in Sources */,
 				A10000010000000000000018 /* DiskUsageCard.swift in Sources */,
 				A10000010000000000000014 /* CleanMacCommands.swift in Sources */,
 				A10000010000000000000015 /* SidebarSelection.swift in Sources */,
@@ -395,7 +399,7 @@
 				CODE_SIGN_ENTITLEMENTS = CleanMac/CleanMac.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = 477K4S3LV2;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -406,7 +410,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.7;
+				MARKETING_VERSION = 1.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cleanmac.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -422,7 +426,7 @@
 				CODE_SIGN_ENTITLEMENTS = CleanMac/CleanMac.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				DEVELOPMENT_TEAM = 477K4S3LV2;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -434,7 +438,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.7;
+				MARKETING_VERSION = 1.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cleanmac.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

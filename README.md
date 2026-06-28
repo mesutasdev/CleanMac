@@ -10,9 +10,9 @@ Apple **Developer ID** ile imzalanmış ve **notarize** edilmiştir — ek kurul
 
 ## İndir (DMG)
 
-[![Download CleanMac 1.0](https://img.shields.io/badge/Download-CleanMac%201.0-blue?style=for-the-badge)](https://github.com/mesutasdev/CleanMac/releases/download/v1.0/CleanMac-1.0.dmg)
+[![Download CleanMac](https://img.shields.io/badge/Download-CleanMac-blue?style=for-the-badge)](https://github.com/mesutasdev/CleanMac/releases/latest)
 
-veya **[Releases](https://github.com/mesutasdev/CleanMac/releases/latest)** sayfasından `CleanMac-1.0.dmg` dosyasını indirin.
+veya **[Releases](https://github.com/mesutasdev/CleanMac/releases/latest)** sayfasından en son `CleanMac-x.x.dmg` dosyasını indirin.
 
 | Gereksinim | Değer |
 |---|---|
@@ -21,10 +21,12 @@ veya **[Releases](https://github.com/mesutasdev/CleanMac/releases/latest)** sayf
 
 ## Kurulum
 
-1. `CleanMac-1.0.dmg` dosyasını indirin
+1. [Releases](https://github.com/mesutasdev/CleanMac/releases/latest) sayfasından en son `.dmg` dosyasını indirin
 2. DMG'yi açın
-3. `CleanMac.app` dosyasını **Applications** klasörüne sürükleyin
+3. `CleanMac.app` dosyasını **Applications** klasörüne sürükleyin (eski sürümün üzerine yazın)
 4. Uygulamayı açın
+
+Eski sürüm açıksa yeni sürüm başlarken otomatik kapanır.
 
 ## Özellikler
 

@@ -20,6 +20,15 @@ struct AboutView: View {
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 280)
 
+            VStack(spacing: 6) {
+                Text("Geliştirici: Mesut As")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                Link("techas.co", destination: URL(string: "https://techas.co")!)
+                    .font(.subheadline.weight(.medium))
+            }
+
             Button("Tamam") {
                 dismiss()
             }

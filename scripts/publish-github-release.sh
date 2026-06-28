@@ -38,20 +38,6 @@ fi
 
 gh release create "$TAG" "$DMG" \
   --title "${APP_NAME} ${VERSION}" \
-  --notes "$(cat <<EOF
-## ${APP_NAME} ${VERSION}
-
-Geliştiriciler için Mac disk temizleyici — Xcode, Flutter, npm, Gradle cache ve daha fazlası.
-
-### Kurulum
-1. \`${APP_NAME}-${VERSION}.dmg\` indir
-2. DMG'yi aç, \`${APP_NAME}.app\` → Applications'a sürükle
-3. Uygulamayı aç
-
-**Gereksinim:** macOS 13.0+
-
-Apple Developer ID ile imzalanmış ve notarize edilmiştir.
-EOF
-)"
+  --notes "$("$ROOT/scripts/release-notes.sh" "$VERSION")"
 
 echo ">> Release hazır: https://github.com/${REPO}/releases/tag/${TAG}"
