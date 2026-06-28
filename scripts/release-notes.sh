@@ -22,7 +22,5 @@ Manuel kurulum: CleanMac'i kapat → \`${APP_NAME}.app\` dosyasını Application
 Apple Developer ID ile imzalanmış ve notarize edilmiştir.
 
 ### Bu sürümde
-- Tarama bitince pencere ve sidebar boyutu sabit kalır
-- Özet kartı ve kategori satırları sabit yükseklikte
-- Üst aksiyon çubuğu taramada da yer kaplar, layout sıçramaz
+- Varsayılan pencere yüksekliği 720px (1020×720)
 EOF
