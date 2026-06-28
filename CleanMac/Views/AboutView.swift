@@ -5,7 +5,7 @@ struct AboutView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            Image("AppLogo")
+            Image("AppBrand")
                 .resizable()
                 .interpolation(.high)
                 .aspectRatio(contentMode: .fit)
