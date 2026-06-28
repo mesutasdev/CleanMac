@@ -47,25 +47,30 @@ struct AboutView: View {
                 .frame(maxWidth: .infinity, alignment: .center)
 
                 VStack(alignment: .leading, spacing: 6) {
-                    supportRow(label: "Hesap Sahibi", value: "Mesut As")
-                    supportRow(label: "Banka", value: "EnPara")
-
-                    HStack(alignment: .top) {
-                        Text("IBAN")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .frame(width: 88, alignment: .leading)
-
-                        Text(iban)
-                            .font(.system(.caption, design: .monospaced))
-                            .textSelection(.enabled)
-
-                        Button("Kopyala") {
-                            copyToClipboard(iban.replacingOccurrences(of: " ", with: ""))
+                    Grid(alignment: .leading, horizontalSpacing: 8, verticalSpacing: 6) {
+                        GridRow(alignment: .firstTextBaseline) {
+                            supportLabel("Hesap Sahibi")
+                            supportValue("Mesut As")
                         }
-                        .buttonStyle(.borderless)
-                        .font(.caption)
-                        .controlSize(.small)
+                        GridRow(alignment: .firstTextBaseline) {
+                            supportLabel("Banka")
+                            supportValue("EnPara")
+                        }
+                        GridRow(alignment: .top) {
+                            supportLabel("IBAN")
+                            HStack(spacing: 8) {
+                                Text(iban)
+                                    .font(.system(.caption, design: .monospaced))
+                                    .textSelection(.enabled)
+
+                                Button("Kopyala") {
+                                    copyToClipboard(iban.replacingOccurrences(of: " ", with: ""))
+                                }
+                                .buttonStyle(.borderless)
+                                .font(.caption)
+                                .controlSize(.small)
+                            }
+                        }
                     }
 
                     Text("Açıklama: CleanMac destek (veya istediğiniz bir not)")
@@ -88,17 +93,16 @@ struct AboutView: View {
         .frame(width: 380)
     }
 
-    private func supportRow(label: String, value: String) -> some View {
-        HStack(alignment: .top) {
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .frame(width: 88, alignment: .leading)
+    private func supportLabel(_ text: String) -> some View {
+        Text(text)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+    }
 
-            Text(value)
-                .font(.caption)
-                .textSelection(.enabled)
-        }
+    private func supportValue(_ text: String) -> some View {
+        Text(text)
+            .font(.caption)
+            .textSelection(.enabled)
     }
 
     private func copyToClipboard(_ text: String) {

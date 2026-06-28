@@ -4,56 +4,57 @@ struct SidebarView: View {
     @ObservedObject var viewModel: CleanMacViewModel
 
     var body: some View {
-        VStack(spacing: 0) {
-            List(selection: $viewModel.sidebarSelection) {
-                Section {
-                    SidebarSummaryCard(
-                        permanentBytes: viewModel.permanentReclaimBytes,
-                        temporaryBytes: viewModel.temporaryReclaimBytes,
-                        isScanning: viewModel.isScanning
+        List(selection: $viewModel.sidebarSelection) {
+            Section {
+                SidebarSummaryCard(
+                    permanentBytes: viewModel.permanentReclaimBytes,
+                    temporaryBytes: viewModel.temporaryReclaimBytes,
+                    isScanning: viewModel.isScanning
+                )
+                .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+            }
+
+            Section("Kategoriler") {
+                NavigationLink(value: SidebarSelection.overview) {
+                    SidebarCategoryLabel(
+                        title: "Genel Bakış",
+                        systemImage: "square.grid.2x2",
+                        byteTotal: viewModel.selectedTotalBytes,
+                        tint: .accentColor
                     )
-                    .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
                 }
 
-                Section("Kategoriler") {
-                    NavigationLink(value: SidebarSelection.overview) {
+                ForEach(viewModel.visibleCategories(), id: \.self) { category in
+                    NavigationLink(value: SidebarSelection.category(category)) {
                         SidebarCategoryLabel(
-                            title: "Genel Bakış",
-                            systemImage: "square.grid.2x2",
-                            byteTotal: viewModel.selectedTotalBytes,
-                            tint: .accentColor
+                            title: category.sidebarTitle,
+                            systemImage: category.systemImage,
+                            byteTotal: viewModel.totalBytes(in: category),
+                            tint: tint(for: category)
                         )
                     }
-
-                    ForEach(viewModel.visibleCategories(), id: \.self) { category in
-                        NavigationLink(value: SidebarSelection.category(category)) {
-                            SidebarCategoryLabel(
-                                title: category.sidebarTitle,
-                                systemImage: category.systemImage,
-                                byteTotal: viewModel.totalBytes(in: category),
-                                tint: tint(for: category)
-                            )
-                        }
-                    }
                 }
             }
-            .listStyle(.sidebar)
-
-            Divider()
-
-            Button {
-                viewModel.presentAbout()
-            } label: {
-                Label("CleanMac Hakkında", systemImage: "info.circle")
-                    .font(.subheadline)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .contentShape(Rectangle())
+        }
+        .listStyle(.sidebar)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            VStack(spacing: 0) {
+                Divider()
+                Button {
+                    viewModel.presentAbout()
+                } label: {
+                    Label("CleanMac Hakkında", systemImage: "info.circle")
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
             }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .background(.bar)
         }
         .navigationTitle("CleanMac")
     }

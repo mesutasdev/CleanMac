@@ -22,6 +22,6 @@ Manuel kurulum: CleanMac'i kapat → \`${APP_NAME}.app\` dosyasını Application
 Apple Developer ID ile imzalanmış ve notarize edilmiştir.
 
 ### Bu sürümde
-- Hakkında ekranı: içeriğe göre boyut, alttaki boş alan kaldırıldı
-- Açıklama metni küçültüldü, Destek ve Buy Me a Coffee yan yana
+- Sidebar altında sabit **CleanMac Hakkında** butonu
+- Hakkında destek satırlarında etiket–değer boşluğu düzeltildi
 EOF
