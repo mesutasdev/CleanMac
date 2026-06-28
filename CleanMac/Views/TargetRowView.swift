@@ -4,8 +4,6 @@ struct TargetRowView: View {
     let target: CleanTarget
     let onToggle: () -> Void
 
-    @State private var showsImpactDetail = false
-
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top, spacing: 12) {
@@ -66,17 +64,18 @@ struct TargetRowView: View {
                     }
 
                     if target.sizeBytes > 0 {
-                        DisclosureGroup(isExpanded: $showsImpactDetail) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Silersen ne olur?")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.secondary)
+
                             Text(target.deletionImpact)
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.leading)
                                 .fixedSize(horizontal: false, vertical: true)
-                                .padding(.top, 4)
-                        } label: {
-                            Text("Silersen ne olur?")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
                         }
+                        .padding(.top, 2)
                     }
                 }
                 .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
