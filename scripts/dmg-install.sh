@@ -2,10 +2,20 @@
 # DMG içindeki CleanMac'i Kur.app tarafından çalıştırılır.
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
-APP="$ROOT/CleanMac.app"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BUNDLED_APP="$SCRIPT_DIR/../Resources/CleanMac.app"
+DMG_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+SIBLING_APP="$DMG_ROOT/CleanMac.app"
 TARGET="/Applications/CleanMac.app"
 BUNDLE_ID="com.cleanmac.app"
+
+if [[ -d "$BUNDLED_APP" ]]; then
+  APP="$BUNDLED_APP"
+elif [[ -d "$SIBLING_APP" ]]; then
+  APP="$SIBLING_APP"
+else
+  APP=""
+fi
 
 cleanmac_pids() {
   ps -ax -o pid=,command= | while read -r pid command; do
@@ -57,8 +67,8 @@ quit_cleanmac() {
   return 0
 }
 
-if [[ ! -d "$APP" ]]; then
-  osascript -e 'display alert "CleanMac.app bulunamadı" message "Kurulum dosyası DMG içinden çalıştırılmalı." as critical'
+if [[ -z "$APP" ]]; then
+  osascript -e 'display alert "CleanMac.app bulunamadı" message "Lütfen DMG dosyasını açın ve CleanMac'"'"'i Kur.app dosyasına çift tıklayın. CleanMac.app dosyasını tek başına taşımayın." as critical'
   exit 1
 fi
 

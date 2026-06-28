@@ -7,8 +7,13 @@ SIGN_IDENTITY="${2:-}"
 
 INSTALLER="$STAGING/CleanMac'i Kur.app"
 MACOS="$INSTALLER/Contents/MacOS"
+RESOURCES="$INSTALLER/Contents/Resources"
+APP_SOURCE="$STAGING/CleanMac.app"
 
-mkdir -p "$MACOS"
+[[ -d "$APP_SOURCE" ]] || { echo "CleanMac.app staging'de bulunamadı: $APP_SOURCE" >&2; exit 1; }
+
+mkdir -p "$MACOS" "$RESOURCES"
+ditto "$APP_SOURCE" "$RESOURCES/CleanMac.app"
 cp "$(cd "$(dirname "$0")" && pwd)/dmg-install.sh" "$MACOS/install"
 chmod +x "$MACOS/install"
 
@@ -43,7 +48,7 @@ cat > "$INSTALLER/Contents/Info.plist" <<'EOF'
 EOF
 
 if [[ -n "$SIGN_IDENTITY" ]]; then
-  /usr/bin/codesign --force --sign "$SIGN_IDENTITY" --options runtime --timestamp "$INSTALLER"
+  /usr/bin/codesign --force --deep --sign "$SIGN_IDENTITY" --options runtime --timestamp "$INSTALLER"
 fi
 
 echo ">> Kurulum uygulaması: $INSTALLER"
