@@ -10,7 +10,6 @@ final class CleanMacViewModel: ObservableObject {
     }
 
     @Published var targets: [CleanTarget] = CleanTarget.makeDefaults()
-    @Published private(set) var targetsGeneration = 0
     @Published var isScanning = false
     @Published var isCleaning = false
     @Published var statusMessage: String?
@@ -293,7 +292,6 @@ final class CleanMacViewModel: ObservableObject {
         transaction.disablesAnimations = true
         withTransaction(transaction) {
             targets = newTargets
-            targetsGeneration += 1
         }
     }
 }

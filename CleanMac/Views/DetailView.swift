@@ -70,7 +70,6 @@ struct DetailView: View {
                 }
             }
             .listStyle(.inset(alternatesRowBackgrounds: true))
-            .id(viewModel.targetsGeneration)
         }
         .navigationTitle(viewModel.detailTitle)
         .toolbar { detailToolbar }
@@ -99,21 +98,11 @@ struct DetailView: View {
 
     @ViewBuilder
     private func targetSection(for category: CleanTargetCategory, showHeader: Bool) -> some View {
-        Section {
-            ForEach(viewModel.targets(in: category)) { target in
-                TargetRowView(
-                    target: target,
-                    isSelected: target.isSelected,
-                    isInteractionLocked: viewModel.isInteractionLocked,
-                    onSelectionChange: { selected in
-                        viewModel.setSelected(id: target.id, selected: selected)
-                    }
-                )
-            }
-
-            SectionCaptionRow(text: category.sectionFooter)
-        } header: {
-            if showHeader {
+        if showHeader {
+            Section {
+                targetRows(for: category)
+                SectionCaptionRow(text: category.sectionFooter)
+            } header: {
                 Label {
                     Text(category.sectionTitle)
                         .multilineTextAlignment(.leading)
@@ -122,6 +111,25 @@ struct DetailView: View {
                     Image(systemName: category.systemImage)
                 }
             }
+        } else {
+            Section {
+                targetRows(for: category)
+                SectionCaptionRow(text: category.sectionFooter)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func targetRows(for category: CleanTargetCategory) -> some View {
+        ForEach(viewModel.targets(in: category)) { target in
+            TargetRowView(
+                target: target,
+                isSelected: target.isSelected,
+                isInteractionLocked: viewModel.isInteractionLocked,
+                onSelectionChange: { selected in
+                    viewModel.setSelected(id: target.id, selected: selected)
+                }
+            )
         }
     }
 

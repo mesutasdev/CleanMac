@@ -30,9 +30,8 @@ Kurulum uygulamasının adı macOS sistem diline göre gösterilir.
 Apple Developer ID ile imzalanmış ve notarize edilmiştir.
 
 ### Bu sürümde
-- **Düzeltme:** "Önerilenleri seç/kaldır" hızlı tıklamada liste bozulması
-- **Düzeltme:** Tarama/temizlik sırasında seçim butonlarının kilitlenmesi
-- **İyileştirme:** Liste satır kimliği ve toplu seçim güncellemeleri stabilize edildi
+- **Düzeltme:** "Önerilenleri Seç/Kaldır" tıklanınca kategori görünümünde başlık ve satırların üst üste binmesi
+- **Düzeltme:** Seçim değişince gereksiz liste yeniden oluşturma kaldırıldı
 
 ### Destek
 
