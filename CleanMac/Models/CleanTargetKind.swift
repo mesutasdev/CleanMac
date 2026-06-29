@@ -17,6 +17,20 @@ enum CleanTargetKind: String, CaseIterable, Identifiable, Sendable {
     case npmCache
     case homebrewCache
     case swiftPMCache
+    case userLogs
+    case generalAppCaches
+    case diagnosticReports
+    case userTrash
+    case iosBackups
+    case httpStorageCache
+    case timeMachineLocalSnapshots
+    case nodeStaleModules
+    case nodeStaleNextCache
+    case flutterEngineCache
+    case gradleWrapperDists
+    case staleProjectBuilds
+    case staleIosPods
+    case androidAvdSnapshots
 
     var id: String { rawValue }
 
@@ -26,13 +40,16 @@ enum CleanTargetKind: String, CaseIterable, Identifiable, Sendable {
 
     var category: CleanTargetCategory {
         switch self {
-        case .xcodeDerivedData, .flutterStaleBuilds, .simulatorUnavailable, .xcodeDeviceSupport:
+        case .xcodeDerivedData, .flutterStaleBuilds, .simulatorUnavailable, .xcodeDeviceSupport,
+             .userLogs, .generalAppCaches, .diagnosticReports, .staleProjectBuilds:
             return .reclaimable
-        case .xcodeArchives, .simulatorData:
+        case .xcodeArchives, .simulatorData, .userTrash, .iosBackups, .httpStorageCache,
+             .timeMachineLocalSnapshots, .staleIosPods, .androidAvdSnapshots:
             return .conditional
         case .xcodeDerivedDataLastBuild, .flutterLastBuild, .xcodeDeviceSupportLatest:
             return .destructive
-        case .xcodeCaches, .cocoaPodsCache, .flutterPubCache, .gradleCache, .npmCache, .homebrewCache, .swiftPMCache:
+        case .xcodeCaches, .cocoaPodsCache, .flutterPubCache, .gradleCache, .npmCache, .homebrewCache,
+             .swiftPMCache, .nodeStaleModules, .nodeStaleNextCache, .flutterEngineCache, .gradleWrapperDists:
             return .regenerating
         }
     }
@@ -75,6 +92,28 @@ enum CleanTargetKind: String, CaseIterable, Identifiable, Sendable {
             return "shippingbox.fill"
         case .homebrewCache:
             return "mug.fill"
+        case .userLogs, .diagnosticReports:
+            return "doc.text.fill"
+        case .generalAppCaches, .httpStorageCache:
+            return "externaldrive.fill"
+        case .userTrash:
+            return "trash.fill"
+        case .iosBackups:
+            return "iphone.and.arrow.forward"
+        case .timeMachineLocalSnapshots:
+            return "clock.arrow.circlepath"
+        case .nodeStaleModules, .nodeStaleNextCache:
+            return "chevron.left.forwardslash.chevron.right"
+        case .flutterEngineCache:
+            return "wind"
+        case .gradleWrapperDists:
+            return "shippingbox.fill"
+        case .staleProjectBuilds:
+            return "hammer.fill"
+        case .staleIosPods:
+            return "leaf.fill"
+        case .androidAvdSnapshots:
+            return "smartphone"
         }
     }
 
@@ -83,7 +122,7 @@ enum CleanTargetKind: String, CaseIterable, Identifiable, Sendable {
     }
 
     var usesShellCommand: Bool {
-        self == .simulatorUnavailable
+        self == .simulatorUnavailable || self == .timeMachineLocalSnapshots
     }
 
     func resolvePath(home: URL) -> URL? {
@@ -115,6 +154,21 @@ enum CleanTargetKind: String, CaseIterable, Identifiable, Sendable {
             return home.appending(path: "Library/Caches/Homebrew")
         case .swiftPMCache:
             return home.appending(path: "Library/Caches/org.swift.swiftpm")
+        case .userLogs:
+            return home.appending(path: "Library/Logs")
+        case .userTrash:
+            return home.appending(path: ".Trash")
+        case .iosBackups:
+            return home.appending(path: "Library/Application Support/MobileSync/Backup")
+        case .httpStorageCache:
+            return home.appending(path: "Library/HTTPStorages")
+        case .generalAppCaches, .diagnosticReports, .timeMachineLocalSnapshots,
+             .nodeStaleModules, .nodeStaleNextCache, .staleProjectBuilds, .staleIosPods, .androidAvdSnapshots:
+            return nil
+        case .flutterEngineCache:
+            return DevProjectBuildHelper.flutterEngineCacheURL(home: home)
+        case .gradleWrapperDists:
+            return home.appending(path: ".gradle/wrapper/dists")
         }
     }
 }

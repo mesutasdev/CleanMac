@@ -51,6 +51,38 @@ enum DiskScanner {
             return measureDeviceSupport(kind, home: home)
         }
 
+        if kind == .generalAppCaches {
+            return measureGeneralAppCaches(home: home)
+        }
+
+        if kind == .diagnosticReports {
+            return measureDiagnosticReports(home: home)
+        }
+
+        if kind == .timeMachineLocalSnapshots {
+            return measureLocalSnapshots(home: home)
+        }
+
+        if kind == .nodeStaleModules {
+            return measureNodeStaleModules(home: home)
+        }
+
+        if kind == .nodeStaleNextCache {
+            return measureNodeStaleNextCache(home: home)
+        }
+
+        if kind == .staleProjectBuilds {
+            return measureStaleProjectBuilds(home: home)
+        }
+
+        if kind == .staleIosPods {
+            return measureStaleIosPods(home: home)
+        }
+
+        if kind == .androidAvdSnapshots {
+            return measureAndroidAvdSnapshots(home: home)
+        }
+
         if kind.usesShellCommand {
             return await measureUnavailableSimulators(home: home)
         }
@@ -277,5 +309,107 @@ enum DiskScanner {
             else { return nil }
             return String(output[uuidRange])
         }
+    }
+
+    private static func measureGeneralAppCaches(home: URL) -> ScanMeasurement {
+        let folders = SystemDataHelper.otherCacheFolders(home: home)
+        let totalSize = SystemDataHelper.totalSize(of: folders)
+        let detail = folders.isEmpty ? nil : L("system.caches.count", folders.count)
+        return ScanMeasurement(
+            sizeBytes: totalSize,
+            exists: totalSize > 0,
+            detail: detail,
+            locationPaths: PathDisplayHelper.displayPaths(Array(folders.prefix(5)), home: home),
+            locationNote: folders.count > 5 ? L("system.caches.more", folders.count - 5) : nil
+        )
+    }
+
+    private static func measureDiagnosticReports(home: URL) -> ScanMeasurement {
+        let paths = SystemDataHelper.diagnosticReportPaths(home: home)
+        let totalSize = SystemDataHelper.totalSize(of: paths)
+        return ScanMeasurement(
+            sizeBytes: totalSize,
+            exists: totalSize > 0,
+            detail: nil,
+            locationPaths: PathDisplayHelper.displayPaths(paths, home: home)
+        )
+    }
+
+    private static func measureLocalSnapshots(home: URL) -> ScanMeasurement {
+        let snapshots = SystemDataHelper.deletableLocalSnapshotNames()
+        guard !snapshots.isEmpty else {
+            return ScanMeasurement(sizeBytes: 0, exists: false, detail: nil, locationPaths: [])
+        }
+
+        let purgeable = SystemDataHelper.purgeableBytesEstimate(home: home)
+        let estimatedSize = max(purgeable, snapshots.isEmpty ? 0 : 1_073_741_824)
+        return ScanMeasurement(
+            sizeBytes: estimatedSize,
+            exists: !snapshots.isEmpty,
+            detail: L("system.snapshots.count", snapshots.count),
+            locationPaths: [],
+            locationNote: L("system.snapshots.note")
+        )
+    }
+
+    private static func measureNodeStaleModules(home: URL) -> ScanMeasurement {
+        let folders = NodeProjectHelper.staleNodeModuleFolders(home: home)
+        let totalSize = NodeProjectHelper.totalSize(of: folders)
+        let latest = NodeProjectHelper.latestProject(home: home)
+        let detail = latest.map { L("node.preserved", NodeProjectHelper.displayName(for: $0)) }
+        return ScanMeasurement(
+            sizeBytes: totalSize,
+            exists: totalSize > 0,
+            detail: detail,
+            locationPaths: PathDisplayHelper.displayPaths(Array(folders.prefix(5)), home: home),
+            locationNote: NodeProjectHelper.searchRootsSummary(home: home)
+        )
+    }
+
+    private static func measureNodeStaleNextCache(home: URL) -> ScanMeasurement {
+        let folders = NodeProjectHelper.staleNextCacheFolders(home: home)
+        let totalSize = NodeProjectHelper.totalSize(of: folders)
+        let latest = NodeProjectHelper.latestProject(home: home)
+        let detail = latest.map { L("node.preserved", NodeProjectHelper.displayName(for: $0)) }
+        return ScanMeasurement(
+            sizeBytes: totalSize,
+            exists: totalSize > 0,
+            detail: detail,
+            locationPaths: PathDisplayHelper.displayPaths(folders, home: home),
+            locationNote: NodeProjectHelper.searchRootsSummary(home: home)
+        )
+    }
+
+    private static func measureStaleProjectBuilds(home: URL) -> ScanMeasurement {
+        let folders = DevProjectBuildHelper.staleBuildOutputs(home: home)
+        let totalSize = DevProjectBuildHelper.totalSize(of: folders)
+        return ScanMeasurement(
+            sizeBytes: totalSize,
+            exists: totalSize > 0,
+            detail: L("project_builds.detail"),
+            locationPaths: PathDisplayHelper.displayPaths(Array(folders.prefix(5)), home: home)
+        )
+    }
+
+    private static func measureStaleIosPods(home: URL) -> ScanMeasurement {
+        let folders = DevProjectBuildHelper.staleIosPodsFolders(home: home)
+        let totalSize = DevProjectBuildHelper.totalSize(of: folders)
+        return ScanMeasurement(
+            sizeBytes: totalSize,
+            exists: totalSize > 0,
+            detail: L("ios_pods.detail"),
+            locationPaths: PathDisplayHelper.displayPaths(folders, home: home)
+        )
+    }
+
+    private static func measureAndroidAvdSnapshots(home: URL) -> ScanMeasurement {
+        let folders = DevProjectBuildHelper.androidAvdSnapshotFolders(home: home)
+        let totalSize = DevProjectBuildHelper.totalSize(of: folders)
+        return ScanMeasurement(
+            sizeBytes: totalSize,
+            exists: totalSize > 0,
+            detail: L("android_avd.detail"),
+            locationPaths: PathDisplayHelper.displayPaths(folders, home: home)
+        )
     }
 }

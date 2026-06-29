@@ -27,9 +27,15 @@ enum DiskCleaner {
                 result = cleanStaleDeviceSupport(target: target, home: home)
             case .xcodeDeviceSupportLatest:
                 result = cleanLatestDeviceSupport(target: target, home: home)
+            case .generalAppCaches:
+                result = cleanGeneralAppCaches(target: target, home: home)
+            case .diagnosticReports:
+                result = cleanDiagnosticReports(target: target, home: home)
+            case .nodeStaleModules, .nodeStaleNextCache, .staleProjectBuilds, .staleIosPods, .androidAvdSnapshots:
+                result = cleanProjectArtifactFolders(target: target, home: home)
             default:
                 if target.kind.usesShellCommand {
-                    result = await cleanWithShell(target)
+                    result = await cleanWithShell(target, home: home)
                 } else if let path = target.kind.resolvePath(home: home) {
                     result = cleanDirectory(target: target, path: path)
                 } else {
@@ -106,6 +112,67 @@ enum DiskCleaner {
         return deleteFolders(latest, target: target)
     }
 
+    private static func cleanGeneralAppCaches(target: CleanTarget, home: URL) -> CleanResult {
+        let folders = SystemDataHelper.otherCacheFolders(home: home)
+        guard !folders.isEmpty else {
+            return CleanResult(kind: target.kind, freedBytes: 0, success: true, message: nil)
+        }
+        return deleteFolders(folders, target: target)
+    }
+
+    private static func cleanDiagnosticReports(target: CleanTarget, home: URL) -> CleanResult {
+        let paths = SystemDataHelper.diagnosticReportPaths(home: home)
+        guard !paths.isEmpty else {
+            return CleanResult(kind: target.kind, freedBytes: 0, success: true, message: nil)
+        }
+
+        var freedBytes: Int64 = 0
+        var lastError: String?
+
+        for path in paths {
+            let sizeBefore = DerivedDataHelper.directorySize(at: path)
+            let result = cleanDirectory(
+                target: CleanTarget(kind: target.kind, sizeBytes: sizeBefore, exists: true, isSelected: true),
+                path: path
+            )
+            if result.success {
+                freedBytes += result.freedBytes
+            } else {
+                lastError = result.message
+            }
+        }
+
+        if freedBytes == 0, let lastError {
+            return CleanResult(kind: target.kind, freedBytes: 0, success: false, message: lastError)
+        }
+
+        return CleanResult(kind: target.kind, freedBytes: freedBytes, success: true, message: nil)
+    }
+
+    private static func cleanProjectArtifactFolders(target: CleanTarget, home: URL) -> CleanResult {
+        let folders: [URL]
+        switch target.kind {
+        case .nodeStaleModules:
+            folders = NodeProjectHelper.staleNodeModuleFolders(home: home)
+        case .nodeStaleNextCache:
+            folders = NodeProjectHelper.staleNextCacheFolders(home: home)
+        case .staleProjectBuilds:
+            folders = DevProjectBuildHelper.staleBuildOutputs(home: home)
+        case .staleIosPods:
+            folders = DevProjectBuildHelper.staleIosPodsFolders(home: home)
+        case .androidAvdSnapshots:
+            folders = DevProjectBuildHelper.androidAvdSnapshotFolders(home: home)
+        default:
+            return CleanResult(kind: target.kind, freedBytes: 0, success: false, message: L("clean.error.unsupported"))
+        }
+
+        guard !folders.isEmpty else {
+            return CleanResult(kind: target.kind, freedBytes: 0, success: true, message: nil)
+        }
+
+        return deleteFolders(folders, target: target)
+    }
+
     private static func deleteFolders(_ folders: [URL], target: CleanTarget) -> CleanResult {
         let fm = FileManager.default
         var freedBytes: Int64 = 0
@@ -175,11 +242,18 @@ enum DiskCleaner {
         }
     }
 
-    private static func cleanWithShell(_ target: CleanTarget) async -> CleanResult {
-        guard target.kind == .simulatorUnavailable else {
+    private static func cleanWithShell(_ target: CleanTarget, home: URL) async -> CleanResult {
+        switch target.kind {
+        case .simulatorUnavailable:
+            return await cleanUnavailableSimulators(target)
+        case .timeMachineLocalSnapshots:
+            return cleanLocalSnapshots(target: target, home: home)
+        default:
             return CleanResult(kind: target.kind, freedBytes: 0, success: false, message: L("clean.error.unsupported"))
         }
+    }
 
+    private static func cleanUnavailableSimulators(_ target: CleanTarget) async -> CleanResult {
         let process = Process()
         let pipe = Pipe()
 
@@ -202,5 +276,21 @@ enum DiskCleaner {
         let errorData = pipe.fileHandleForReading.readDataToEndOfFile()
         let errorMessage = String(data: errorData, encoding: .utf8) ?? "Simülatör silinemedi"
         return CleanResult(kind: target.kind, freedBytes: 0, success: false, message: errorMessage)
+    }
+
+    private static func cleanLocalSnapshots(target: CleanTarget, home: URL) -> CleanResult {
+        let before = DiskSpaceService.current()?.freeBytes ?? 0
+        let outcome = SystemDataHelper.deleteLocalSnapshots()
+
+        guard outcome.deleted > 0 else {
+            if let error = outcome.error {
+                return CleanResult(kind: target.kind, freedBytes: 0, success: false, message: error)
+            }
+            return CleanResult(kind: target.kind, freedBytes: 0, success: true, message: nil)
+        }
+
+        let after = DiskSpaceService.current()?.freeBytes ?? before
+        let freedBytes = max(after - before, target.sizeBytes)
+        return CleanResult(kind: target.kind, freedBytes: freedBytes, success: true, message: nil)
     }
 }

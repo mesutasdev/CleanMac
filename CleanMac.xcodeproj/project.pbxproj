@@ -23,6 +23,9 @@
 		A10000010000000000000016 /* CleanMacNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000016 /* CleanMacNotifications.swift */; };
 		A1000001000000000000000A /* ByteCountFormatter+Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000000A /* ByteCountFormatter+Shared.swift */; };
 		A1000001000000000000000C /* DerivedDataHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000000E /* DerivedDataHelper.swift */; };
+		A10000010000000000000040 /* SystemDataHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000040 /* SystemDataHelper.swift */; };
+		A10000010000000000000041 /* NodeProjectHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000041 /* NodeProjectHelper.swift */; };
+		A10000010000000000000042 /* DevProjectBuildHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000042 /* DevProjectBuildHelper.swift */; };
 		A1000001000000000000000D /* CleanTargetCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000000F /* CleanTargetCategory.swift */; };
 		A1000001000000000000000E /* DeviceSupportHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000010 /* DeviceSupportHelper.swift */; };
 		A10000010000000000000017 /* DiskSpaceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000017 /* DiskSpaceService.swift */; };
@@ -64,6 +67,9 @@
 		A20000010000000000000016 /* CleanMacNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanMacNotifications.swift; sourceTree = "<group>"; };
 		A2000001000000000000000A /* ByteCountFormatter+Shared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ByteCountFormatter+Shared.swift"; sourceTree = "<group>"; };
 		A2000001000000000000000E /* DerivedDataHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DerivedDataHelper.swift; sourceTree = "<group>"; };
+		A20000010000000000000040 /* SystemDataHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemDataHelper.swift; sourceTree = "<group>"; };
+		A20000010000000000000041 /* NodeProjectHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeProjectHelper.swift; sourceTree = "<group>"; };
+		A20000010000000000000042 /* DevProjectBuildHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevProjectBuildHelper.swift; sourceTree = "<group>"; };
 		A2000001000000000000000F /* CleanTargetCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanTargetCategory.swift; sourceTree = "<group>"; };
 		A20000010000000000000010 /* DeviceSupportHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceSupportHelper.swift; sourceTree = "<group>"; };
 		A20000010000000000000017 /* DiskSpaceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskSpaceService.swift; sourceTree = "<group>"; };
@@ -196,6 +202,9 @@
 			children = (
 				A2000001000000000000000A /* ByteCountFormatter+Shared.swift */,
 				A2000001000000000000000E /* DerivedDataHelper.swift */,
+				A20000010000000000000040 /* SystemDataHelper.swift */,
+				A20000010000000000000041 /* NodeProjectHelper.swift */,
+				A20000010000000000000042 /* DevProjectBuildHelper.swift */,
 				A20000010000000000000019 /* FlutterBuildHelper.swift */,
 				A20000010000000000000010 /* DeviceSupportHelper.swift */,
 				A20000010000000000000034 /* PathDisplayHelper.swift */,
@@ -310,6 +319,9 @@
 				A10000010000000000000016 /* CleanMacNotifications.swift in Sources */,
 				A1000001000000000000000A /* ByteCountFormatter+Shared.swift in Sources */,
 				A1000001000000000000000C /* DerivedDataHelper.swift in Sources */,
+				A10000010000000000000040 /* SystemDataHelper.swift in Sources */,
+				A10000010000000000000041 /* NodeProjectHelper.swift in Sources */,
+				A10000010000000000000042 /* DevProjectBuildHelper.swift in Sources */,
 				A1000001000000000000000F /* FlutterBuildHelper.swift in Sources */,
 				A1000001000000000000000E /* DeviceSupportHelper.swift in Sources */,
 				A10000010000000000000034 /* PathDisplayHelper.swift in Sources */,
