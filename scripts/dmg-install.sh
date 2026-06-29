@@ -1,5 +1,5 @@
 #!/bin/bash
-# DMG içindeki Install CleanMac.app tarafından çalıştırılır.
+# DMG içindeki CleanMac'i Kur.app tarafından çalıştırılır.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -9,11 +9,16 @@ SIBLING_APP="$DMG_ROOT/CleanMac.app"
 TARGET="/Applications/CleanMac.app"
 BUNDLE_ID="com.cleanmac.app"
 
-if [[ "${LANG:-}" == tr* ]] || defaults read -g AppleLanguages 2>/dev/null | grep -q '"tr"'; then
-  MSG_NOT_FOUND='display alert "CleanMac.app bulunamadı" message "DMG içinde Install CleanMac.app (CleanMac'"'"'i Kur) dosyasına çift tıklayın. CleanMac.app dosyasını tek başına taşımayın." as critical'
+is_turkish_locale() {
+  [[ "${LANG:-}" == tr* ]] && return 0
+  defaults read -g AppleLanguages 2>/dev/null | grep -q '"tr"' 
+}
+
+if is_turkish_locale; then
+  MSG_NOT_FOUND='display alert "CleanMac.app bulunamadı" message "Lütfen DMG dosyasını açın ve CleanMac'"'"'i Kur.app dosyasına çift tıklayın. CleanMac.app dosyasını tek başına taşımayın." as critical'
   MSG_QUIT_FAILED='display alert "CleanMac kapatılamadı" message "Menü çubuğundan CleanMac'"'"'den Çık deyip tekrar deneyin." as critical'
 else
-  MSG_NOT_FOUND='display alert "CleanMac.app not found" message "Open the DMG and double-click Install CleanMac.app (CleanMac'"'"'i Kur). Do not move CleanMac.app alone." as critical'
+  MSG_NOT_FOUND='display alert "CleanMac.app not found" message "Open the DMG and double-click CleanMac'"'"'i Kur.app. Do not move CleanMac.app on its own." as critical'
   MSG_QUIT_FAILED='display alert "Could not quit CleanMac" message "Quit CleanMac from the menu bar and try again." as critical'
 fi
 

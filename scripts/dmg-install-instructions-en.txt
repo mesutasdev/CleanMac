@@ -1,0 +1,12 @@
+CleanMac — Installation
+
+Choose either method:
+
+METHOD 1 — Double-click to install and open
+  1) Double-click "CleanMac'i Kur.app"
+  2) CleanMac is installed to Applications and opens automatically
+
+METHOD 2 — Drag and drop
+  1) If CleanMac is running, quit from the menu bar
+  2) Drag CleanMac.app into the Applications folder
+  3) Open CleanMac from Applications

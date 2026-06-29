@@ -1,0 +1,12 @@
+CleanMac — Kurulum
+
+İki yoldan birini seçin:
+
+YOL 1 — Çift tıkla, kur, otomatik aç
+  1) "CleanMac'i Kur.app" dosyasına çift tıklayın
+  2) Uygulama Applications'a kurulur ve CleanMac otomatik açılır
+
+YOL 2 — Sürükle bırak
+  1) CleanMac açıksa menü çubuğundan çıkın
+  2) CleanMac.app dosyasını Applications klasörüne sürükleyin
+  3) Applications klasöründen CleanMac'i açın

@@ -57,23 +57,37 @@ ln -sf /Applications "$DMG_STAGING/Applications"
 
 if [[ "${USE_DEVELOPER_ID:-0}" -eq 1 ]]; then
   "$ROOT/scripts/create-installer-app.sh" "$DMG_STAGING" "$RESIGN_IDENTITY"
-  cp "$ROOT/scripts/dmg-install-instructions.txt" "$DMG_STAGING/INSTALL.txt"
-  cp "$ROOT/scripts/dmg-install-instructions.txt" "$DMG_STAGING/KURULUM.txt"
+  cp "$ROOT/scripts/dmg-install-instructions-en.txt" "$DMG_STAGING/INSTALL.txt"
+  cp "$ROOT/scripts/dmg-install-instructions-tr.txt" "$DMG_STAGING/KURULUM.txt"
 elif [[ "$RESIGN_IDENTITY" != "Developer ID Application" ]]; then
   cp "$CA_CRT" "$DMG_STAGING/CleanMac-Root-CA.crt"
-  cat > "$DMG_STAGING/INSTALL.txt" <<'EOF'
-CleanMac — Install / Kurulum (Developer build)
+  cat > "$DMG_STAGING/KURULUM.txt" <<'EOF'
+CleanMac — Kurulum (Geliştirici build)
 
-① Drag & drop · Sürükle bırak
-   Drag CleanMac.app → Applications  ·  CleanMac.app → Applications
+YOL 1 — Sürükle bırak
+  1) CleanMac.app dosyasını Applications klasörüne sürükleyin
+  2) Applications klasöründen CleanMac'i açın
 
-② First launch / İlk açılış (if macOS warns · macOS uyarı verirse)
-   Double-click CleanMac-Root-CA.crt  ·  CleanMac-Root-CA.crt dosyasına çift tıklayın
-   Keychain Access > System > CleanMac Root CA > Always Trust
-   ·  Anahtar Zinciri > Sistem > CleanMac Root CA > Her Zaman Güven
-   Right-click CleanMac.app > Open  ·  CleanMac.app > Sağ tık > Aç
+YOL 2 — İlk açılış uyarısı
+  macOS uyarı verirse:
+  - CleanMac-Root-CA.crt dosyasını çift tıklayın
+  - Anahtar Zinciri Erişimi > Sistem > CleanMac Root CA
+  - Güven > Kod imzalama için: Her Zaman Güven
+  - CleanMac.app için Sağ tık > Aç > Aç
 EOF
-  cp "$DMG_STAGING/INSTALL.txt" "$DMG_STAGING/KURULUM.txt"
+  cat > "$DMG_STAGING/INSTALL.txt" <<'EOF'
+CleanMac — Installation (Developer build)
+
+METHOD 1 — Drag and drop
+  1) Drag CleanMac.app into the Applications folder
+  2) Open CleanMac from Applications
+
+METHOD 2 — First launch warning
+  If macOS warns:
+  - Double-click CleanMac-Root-CA.crt
+  - Keychain Access > System > CleanMac Root CA > Always Trust
+  - Right-click CleanMac.app > Open > Open
+EOF
 fi
 
 hdiutil create -volname "$APP_NAME" -srcfolder "$DMG_STAGING" -ov -format UDZO "$DMG_OUTPUT"
@@ -93,13 +107,13 @@ if [[ "${USE_DEVELOPER_ID:-0}" -eq 1 ]]; then
       hdiutil detach "$VERIFY_MOUNT" -quiet 2>/dev/null || true
       exit 1
     fi
-    if ! spctl -a -t exec -- "$VERIFY_MOUNT/Install CleanMac.app" >/dev/null 2>&1; then
-      echo "HATA: Install CleanMac.app Gatekeeper doğrulaması başarısız" >&2
+    if ! spctl -a -t exec -- "$VERIFY_MOUNT/CleanMac'i Kur.app" >/dev/null 2>&1; then
+      echo "HATA: CleanMac'i Kur.app Gatekeeper doğrulaması başarısız" >&2
       hdiutil detach "$VERIFY_MOUNT" -quiet 2>/dev/null || true
       exit 1
     fi
     hdiutil detach "$VERIFY_MOUNT" -quiet
-    echo ">> Gatekeeper doğrulandı (CleanMac.app + Install CleanMac.app)"
+    echo ">> Gatekeeper doğrulandı (CleanMac.app + CleanMac'i Kur.app)"
   fi
 fi
 
