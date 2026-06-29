@@ -10,6 +10,7 @@ final class CleanMacViewModel: ObservableObject {
     }
 
     @Published var targets: [CleanTarget] = CleanTarget.makeDefaults()
+    @Published private(set) var targetsGeneration = 0
     @Published var isScanning = false
     @Published var isCleaning = false
     @Published var statusMessage: String?
@@ -19,7 +20,13 @@ final class CleanMacViewModel: ObservableObject {
     @Published var sidebarSelection: SidebarSelection = .overview
     @Published var showAbout = false
     @Published var diskSpace: DiskSpaceInfo? = DiskSpaceService.current()
+
     private var shouldAutoClearStatus = false
+    private var runningScan: Task<Void, Never>?
+
+    var isInteractionLocked: Bool {
+        isScanning || isCleaning
+    }
 
     var selectedTotalBytes: Int64 {
         targets.filter(\.isSelected).reduce(0) { $0 + $1.sizeBytes }
@@ -88,15 +95,6 @@ final class CleanMacViewModel: ObservableObject {
         }
     }
 
-    func filteredTargets(for selection: SidebarSelection) -> [(CleanTargetCategory, [CleanTarget])] {
-        switch selection {
-        case .overview:
-            return visibleCategories().map { ($0, targets(in: $0)) }
-        case .category(let category):
-            return [(category, targets(in: category))]
-        }
-    }
-
     var detailTitle: String {
         switch sidebarSelection {
         case .overview: return L("sidebar.overview")
@@ -118,7 +116,23 @@ final class CleanMacViewModel: ObservableObject {
     }
 
     func scan(options: ScanOptions = ScanOptions()) async {
+        if let runningScan {
+            await runningScan.value
+        }
+
         guard !isScanning else { return }
+
+        let task = Task { @MainActor in
+            await performScan(options: options)
+        }
+        runningScan = task
+        await task.value
+        runningScan = nil
+    }
+
+    private func performScan(options: ScanOptions) async {
+        guard !isScanning else { return }
+
         isScanning = true
         statusMessage = L("scan.scanning_status")
         if options.resetLastFreed {
@@ -130,7 +144,7 @@ final class CleanMacViewModel: ObservableObject {
         let previousSelection = Dictionary(uniqueKeysWithValues: targets.map { ($0.id, $0.isSelected) })
         let scanned = await DiskScanner.scanAll()
 
-        targets = scanned.map { target in
+        replaceTargets(scanned.map { target in
             var updated = target
             if let selected = previousSelection[target.id] {
                 updated.isSelected = selected
@@ -139,7 +153,7 @@ final class CleanMacViewModel: ObservableObject {
                 updated.isSelected = false
             }
             return updated
-        }
+        })
 
         isScanning = false
         if options.clearStatusMessage {
@@ -163,22 +177,14 @@ final class CleanMacViewModel: ObservableObject {
     }
 
     func setSelected(id: String, selected: Bool) {
+        guard !isInteractionLocked else { return }
         guard let index = targets.firstIndex(where: { $0.id == id }) else { return }
         guard targets[index].isSelected != selected else { return }
+        guard targets[index].sizeBytes > 0 || !selected else { return }
+
         var updated = targets
         updated[index].isSelected = selected
-        targets = updated
-    }
-
-    func selectionBinding(for id: String) -> Binding<Bool> {
-        Binding(
-            get: { [weak self] in
-                self?.targets.first(where: { $0.id == id })?.isSelected ?? false
-            },
-            set: { [weak self] selected in
-                self?.setSelected(id: id, selected: selected)
-            }
-        )
+        replaceTargets(updated)
     }
 
     var includesDestructiveDeletion: Bool {
@@ -190,14 +196,18 @@ final class CleanMacViewModel: ObservableObject {
     }
 
     func selectRecommended() {
-        targets = targets.map { target in
+        guard !isInteractionLocked else { return }
+
+        replaceTargets(targets.map { target in
             var updated = target
             updated.isSelected = target.category == .reclaimable && target.sizeBytes > 0
             return updated
-        }
+        })
     }
 
     func toggleRecommendedSelection() {
+        guard !isInteractionLocked else { return }
+
         if isRecommendedSelectionActive {
             selectAll(false)
         } else {
@@ -206,7 +216,9 @@ final class CleanMacViewModel: ObservableObject {
     }
 
     func selectAll(_ selected: Bool) {
-        targets = targets.map { target in
+        guard !isInteractionLocked else { return }
+
+        replaceTargets(targets.map { target in
             var updated = target
             if !selected {
                 updated.isSelected = false
@@ -219,18 +231,18 @@ final class CleanMacViewModel: ObservableObject {
                 || target.kind == .xcodeDeviceSupportLatest
             updated.isSelected = target.sizeBytes > 0 && !isHiddenRegenerating && !isProtectedDestructive
             return updated
-        }
+        })
     }
 
     func requestClean() {
-        guard selectedTotalBytes > 0, !isCleaning else { return }
+        guard selectedTotalBytes > 0, !isInteractionLocked else { return }
         MainWindowController.show()
         showCleanConfirmation = true
     }
 
     func cleanConfirmed() async {
         showCleanConfirmation = false
-        guard !isCleaning else { return }
+        guard !isInteractionLocked else { return }
 
         isCleaning = true
         shouldAutoClearStatus = false
@@ -273,6 +285,15 @@ final class CleanMacViewModel: ObservableObject {
             guard let self, self.shouldAutoClearStatus else { return }
             self.statusMessage = nil
             self.shouldAutoClearStatus = false
+        }
+    }
+
+    private func replaceTargets(_ newTargets: [CleanTarget]) {
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            targets = newTargets
+            targetsGeneration += 1
         }
     }
 }

@@ -3,16 +3,23 @@ import SwiftUI
 
 struct TargetRowView: View {
     let target: CleanTarget
-    @Binding var isSelected: Bool
+    let isSelected: Bool
+    let isInteractionLocked: Bool
+    let onSelectionChange: (Bool) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top, spacing: 12) {
-                Toggle(isOn: $isSelected) {
+                Toggle(
+                    isOn: Binding(
+                        get: { isSelected },
+                        set: { onSelectionChange($0) }
+                    )
+                ) {
                     EmptyView()
                 }
                 .toggleStyle(.checkbox)
-                .disabled(target.sizeBytes == 0)
+                .disabled(target.sizeBytes == 0 || isInteractionLocked)
                 .padding(.top, 4)
 
                 Image(systemName: target.icon)
@@ -86,6 +93,7 @@ struct TargetRowView: View {
         .opacity(target.sizeBytes > 0 ? 1 : 0.5)
         .padding(.vertical, 6)
         .listRowInsets(EdgeInsets(top: 8, leading: 4, bottom: 8, trailing: 12))
+        .id(target.id)
     }
 
     private var iconTint: Color {

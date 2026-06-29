@@ -23,13 +23,13 @@ struct MenuBarView: View {
             MainWindowController.show()
             NotificationCenter.default.post(name: .cleanMacScan, object: nil)
         }
-        .disabled(viewModel.isScanning || viewModel.isCleaning)
+        .disabled(viewModel.isInteractionLocked)
 
         Button(L("menu.free_space")) {
             MainWindowController.show()
             viewModel.requestClean()
         }
-        .disabled(viewModel.selectedTotalBytes == 0 || viewModel.isScanning || viewModel.isCleaning)
+        .disabled(viewModel.selectedTotalBytes == 0 || viewModel.isInteractionLocked)
 
         Divider()
 

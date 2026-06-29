@@ -8,89 +8,69 @@ struct DetailView: View {
             SelectionActionsBar(
                 selectedBytes: viewModel.selectedTotalBytes,
                 isRecommendedSelectionActive: viewModel.isRecommendedSelectionActive,
-                isSelectionDisabled: viewModel.isCleaning || (viewModel.isScanning && !viewModel.hasScanned),
-                isCleanDisabled: viewModel.isCleaning || viewModel.isScanning || viewModel.selectedTotalBytes == 0,
+                isSelectionDisabled: viewModel.isInteractionLocked,
+                isCleanDisabled: viewModel.isInteractionLocked || viewModel.selectedTotalBytes == 0,
                 onToggleRecommended: { viewModel.toggleRecommendedSelection() },
                 onClean: { viewModel.requestClean() }
             )
             .opacity(viewModel.isScanning && !viewModel.hasScanned ? 0.55 : 1)
 
             List {
-            if viewModel.sidebarSelection == .overview {
-                Section {
-                    DiskUsageCard(
-                        diskSpace: viewModel.diskSpace,
-                        selectedBytes: viewModel.selectedTotalBytes,
-                        permanentBytes: viewModel.permanentReclaimBytes
-                    )
-                    .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 8, trailing: 16))
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                } header: {
-                    Text(L("detail.disk_space"))
-                }
-                .onAppear {
-                    viewModel.refreshDiskSpace()
-                }
-            }
-
-            if viewModel.isScanning && !viewModel.hasScanned {
-                Section {
-                    HStack(spacing: 12) {
-                        ProgressView()
-                            .controlSize(.regular)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(L("detail.scanning_title"))
-                                .font(.body)
-                            Text(L("detail.scanning_subtitle"))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .padding(.vertical, 8)
-                }
-            } else {
-                ForEach(viewModel.filteredTargets(for: viewModel.sidebarSelection), id: \.0) { category, targets in
+                if viewModel.sidebarSelection == .overview {
                     Section {
-                        ForEach(targets) { target in
-                            TargetRowView(
-                                target: target,
-                                isSelected: viewModel.selectionBinding(for: target.id)
-                            )
-                        }
-
-                        SectionCaptionRow(text: category.sectionFooter)
+                        DiskUsageCard(
+                            diskSpace: viewModel.diskSpace,
+                            selectedBytes: viewModel.selectedTotalBytes,
+                            permanentBytes: viewModel.permanentReclaimBytes
+                        )
+                        .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 8, trailing: 16))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
                     } header: {
-                        if viewModel.sidebarSelection == .overview {
-                            Label {
-                                Text(category.sectionTitle)
-                                    .multilineTextAlignment(.leading)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            } icon: {
-                                Image(systemName: category.systemImage)
+                        Text(L("detail.disk_space"))
+                    }
+                    .onAppear {
+                        viewModel.refreshDiskSpace()
+                    }
+                }
+
+                if viewModel.isScanning && !viewModel.hasScanned {
+                    Section {
+                        HStack(spacing: 12) {
+                            ProgressView()
+                                .controlSize(.regular)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(L("detail.scanning_title"))
+                                    .font(.body)
+                                Text(L("detail.scanning_subtitle"))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
                         }
+                        .padding(.vertical, 8)
                     }
-                }
+                } else {
+                    targetSections
 
-                if !viewModel.showRegeneratingCaches && viewModel.sidebarSelection == .overview {
-                    Section {
-                        Button {
-                            viewModel.showRegeneratingCaches = true
-                        } label: {
-                            Label(L("detail.show_advanced_caches"), systemImage: "gearshape")
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .contentShape(Rectangle())
+                    if !viewModel.showRegeneratingCaches && viewModel.sidebarSelection == .overview {
+                        Section {
+                            Button {
+                                viewModel.showRegeneratingCaches = true
+                            } label: {
+                                Label(L("detail.show_advanced_caches"), systemImage: "gearshape")
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .contentShape(Rectangle())
+                            }
+
+                            SectionCaptionRow(
+                                text: L("detail.advanced_caches_footer")
+                            )
                         }
-
-                        SectionCaptionRow(
-                            text: L("detail.advanced_caches_footer")
-                        )
                     }
                 }
             }
-        }
-        .listStyle(.inset(alternatesRowBackgrounds: true))
+            .listStyle(.inset(alternatesRowBackgrounds: true))
+            .id(viewModel.targetsGeneration)
         }
         .navigationTitle(viewModel.detailTitle)
         .toolbar { detailToolbar }
@@ -105,6 +85,46 @@ struct DetailView: View {
         }
     }
 
+    @ViewBuilder
+    private var targetSections: some View {
+        switch viewModel.sidebarSelection {
+        case .overview:
+            ForEach(viewModel.visibleCategories(), id: \.self) { category in
+                targetSection(for: category, showHeader: true)
+            }
+        case .category(let category):
+            targetSection(for: category, showHeader: false)
+        }
+    }
+
+    @ViewBuilder
+    private func targetSection(for category: CleanTargetCategory, showHeader: Bool) -> some View {
+        Section {
+            ForEach(viewModel.targets(in: category)) { target in
+                TargetRowView(
+                    target: target,
+                    isSelected: target.isSelected,
+                    isInteractionLocked: viewModel.isInteractionLocked,
+                    onSelectionChange: { selected in
+                        viewModel.setSelected(id: target.id, selected: selected)
+                    }
+                )
+            }
+
+            SectionCaptionRow(text: category.sectionFooter)
+        } header: {
+            if showHeader {
+                Label {
+                    Text(category.sectionTitle)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                } icon: {
+                    Image(systemName: category.systemImage)
+                }
+            }
+        }
+    }
+
     @ToolbarContentBuilder
     private var detailToolbar: some ToolbarContent {
         ToolbarItemGroup(placement: .primaryAction) {
@@ -115,7 +135,7 @@ struct DetailView: View {
             }
             .labelStyle(.titleAndIcon)
             .help(L("detail.refresh_help"))
-            .disabled(viewModel.isScanning || viewModel.isCleaning)
+            .disabled(viewModel.isInteractionLocked)
         }
     }
 }

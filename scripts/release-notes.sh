@@ -30,8 +30,9 @@ Kurulum uygulamasının adı macOS sistem diline göre gösterilir.
 Apple Developer ID ile imzalanmış ve notarize edilmiştir.
 
 ### Bu sürümde
-- **Düzeltme:** Uygulama içi güncelleme "Copying app…" ekranında takılma sorunu giderildi
-- **İyileştirme:** Güncelleme artık her zaman kurulum uygulaması üzerinden yapılıyor
+- **Düzeltme:** "Önerilenleri seç/kaldır" hızlı tıklamada liste bozulması
+- **Düzeltme:** Tarama/temizlik sırasında seçim butonlarının kilitlenmesi
+- **İyileştirme:** Liste satır kimliği ve toplu seçim güncellemeleri stabilize edildi
 
 ### Destek
 

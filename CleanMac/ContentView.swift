@@ -29,14 +29,17 @@ struct ContentView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .cleanMacToggleRecommended)) { _ in
             MainWindowController.show()
+            guard !viewModel.isInteractionLocked else { return }
             viewModel.toggleRecommendedSelection()
         }
         .onReceive(NotificationCenter.default.publisher(for: .cleanMacSelectRecommended)) { _ in
             MainWindowController.show()
+            guard !viewModel.isInteractionLocked else { return }
             viewModel.selectRecommended()
         }
         .onReceive(NotificationCenter.default.publisher(for: .cleanMacDeselectAll)) { _ in
             MainWindowController.show()
+            guard !viewModel.isInteractionLocked else { return }
             viewModel.selectAll(false)
         }
         .onReceive(NotificationCenter.default.publisher(for: .cleanMacScan)) { _ in
