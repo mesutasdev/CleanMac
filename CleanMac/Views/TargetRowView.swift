@@ -150,6 +150,8 @@ private struct LocationPathsView: View {
                         } label: {
                             Image(systemName: "folder")
                                 .font(.caption2)
+                                .padding(4)
+                                .contentShape(Rectangle())
                         }
                         .buttonStyle(.borderless)
                         .help(L("target.show_in_finder"))

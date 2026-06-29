@@ -81,6 +81,8 @@ struct AboutView: View {
                                 } label: {
                                     Image(systemName: "doc.on.doc")
                                         .font(.caption2)
+                                        .padding(4)
+                                        .contentShape(Rectangle())
                                 }
                                 .buttonStyle(.borderless)
                                 .help(L("about.copy_iban"))

@@ -107,13 +107,13 @@ if [[ "${USE_DEVELOPER_ID:-0}" -eq 1 ]]; then
       hdiutil detach "$VERIFY_MOUNT" -quiet 2>/dev/null || true
       exit 1
     fi
-    if ! spctl -a -t exec -- "$VERIFY_MOUNT/CleanMac'i Kur.app" >/dev/null 2>&1; then
-      echo "HATA: CleanMac'i Kur.app Gatekeeper doğrulaması başarısız" >&2
+    if ! spctl -a -t exec -- "$VERIFY_MOUNT/Install CleanMac.app" >/dev/null 2>&1; then
+      echo "HATA: Install CleanMac.app Gatekeeper doğrulaması başarısız" >&2
       hdiutil detach "$VERIFY_MOUNT" -quiet 2>/dev/null || true
       exit 1
     fi
     hdiutil detach "$VERIFY_MOUNT" -quiet
-    echo ">> Gatekeeper doğrulandı (CleanMac.app + CleanMac'i Kur.app)"
+    echo ">> Gatekeeper doğrulandı (CleanMac.app + Install CleanMac.app)"
   fi
 fi
 

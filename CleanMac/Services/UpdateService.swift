@@ -40,7 +40,7 @@ actor UpdateService {
     static let shared = UpdateService()
 
     private let repo = "mesutasdev/CleanMac"
-    private let installerAppNames = ["CleanMac'i Kur.app", "Install CleanMac.app"]
+    private let installerAppNames = ["Install CleanMac.app", "CleanMac'i Kur.app"]
     private let appName = "CleanMac.app"
 
     func fetchLatestUpdate() async throws -> AvailableUpdate? {

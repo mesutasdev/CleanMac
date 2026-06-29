@@ -79,6 +79,8 @@ struct DetailView: View {
                             viewModel.showRegeneratingCaches = true
                         } label: {
                             Label(L("detail.show_advanced_caches"), systemImage: "gearshape")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .contentShape(Rectangle())
                         }
 
                         SectionCaptionRow(

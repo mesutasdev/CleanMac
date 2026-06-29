@@ -20,6 +20,7 @@ struct AppearanceToggleView: View {
                     .padding(.horizontal, 6)
                     .padding(.vertical, 8)
                     .frame(maxWidth: .infinity)
+                    .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                     .background(
                         appearanceManager.selectedAppearance == appearance
                             ? AnyShapeStyle(Color.accentColor.opacity(0.18))

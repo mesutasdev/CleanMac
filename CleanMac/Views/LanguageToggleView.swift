@@ -17,6 +17,7 @@ struct LanguageToggleView: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
                     .frame(maxWidth: .infinity)
+                    .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                     .background(
                         languageManager.selectedLanguage == language
                             ? AnyShapeStyle(Color.accentColor.opacity(0.18))

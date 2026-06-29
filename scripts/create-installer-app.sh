@@ -1,11 +1,11 @@
 #!/bin/bash
-# Sessiz kurulum uygulaması: CleanMac'i Kur.app
+# Sessiz kurulum uygulaması: Install CleanMac.app (TR: CleanMac'i Kur)
 set -euo pipefail
 
 STAGING="${1:?Staging klasörü gerekli}"
 SIGN_IDENTITY="${2:-}"
 
-INSTALLER="$STAGING/CleanMac'i Kur.app"
+INSTALLER="$STAGING/Install CleanMac.app"
 MACOS="$INSTALLER/Contents/MacOS"
 RESOURCES="$INSTALLER/Contents/Resources"
 APP_SOURCE="$STAGING/CleanMac.app"
@@ -15,7 +15,7 @@ APP_SOURCE="$STAGING/CleanMac.app"
 APP_VERSION="$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$APP_SOURCE/Contents/Info.plist")"
 APP_BUILD="$(/usr/libexec/PlistBuddy -c 'Print CFBundleVersion' "$APP_SOURCE/Contents/Info.plist")"
 
-mkdir -p "$MACOS" "$RESOURCES"
+mkdir -p "$MACOS" "$RESOURCES/en.lproj" "$RESOURCES/tr.lproj"
 ditto "$APP_SOURCE" "$RESOURCES/CleanMac.app"
 cp "$(cd "$(dirname "$0")" && pwd)/dmg-install.sh" "$MACOS/install"
 chmod +x "$MACOS/install"
@@ -25,13 +25,23 @@ if [[ -f "$APP_ICON" ]]; then
   cp "$APP_ICON" "$RESOURCES/AppIcon.icns"
 fi
 
+cat > "$RESOURCES/en.lproj/InfoPlist.strings" <<'EOF'
+CFBundleDisplayName = "Install CleanMac";
+CFBundleName = "Install CleanMac";
+EOF
+
+cat > "$RESOURCES/tr.lproj/InfoPlist.strings" <<'EOF'
+CFBundleDisplayName = "CleanMac'i Kur";
+CFBundleName = "CleanMac'i Kur";
+EOF
+
 cat > "$INSTALLER/Contents/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>tr</string>
+	<string>en</string>
 	<key>CFBundleExecutable</key>
 	<string>install</string>
 	<key>CFBundleIdentifier</key>
@@ -39,9 +49,9 @@ cat > "$INSTALLER/Contents/Info.plist" <<EOF
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>CleanMac'i Kur</string>
+	<string>Install CleanMac</string>
 	<key>CFBundleDisplayName</key>
-	<string>CleanMac'i Kur</string>
+	<string>Install CleanMac</string>
 	<key>CFBundleIconFile</key>
 	<string>AppIcon</string>
 	<key>CFBundleIconName</key>
