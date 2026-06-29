@@ -20,6 +20,11 @@ ditto "$APP_SOURCE" "$RESOURCES/CleanMac.app"
 cp "$(cd "$(dirname "$0")" && pwd)/dmg-install.sh" "$MACOS/install"
 chmod +x "$MACOS/install"
 
+APP_ICON="$APP_SOURCE/Contents/Resources/AppIcon.icns"
+if [[ -f "$APP_ICON" ]]; then
+  cp "$APP_ICON" "$RESOURCES/AppIcon.icns"
+fi
+
 /usr/libexec/PlistBuddy -c "Add :CFBundleDevelopmentRegion string tr" "$MACOS/../Info.plist" 2>/dev/null || true
 cat > "$INSTALLER/Contents/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -36,6 +41,12 @@ cat > "$INSTALLER/Contents/Info.plist" <<EOF
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>CleanMac'i Kur</string>
+	<key>CFBundleDisplayName</key>
+	<string>CleanMac'i Kur</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

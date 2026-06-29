@@ -27,10 +27,7 @@ Manuel kurulum: CleanMac'i kapat → \`${APP_NAME}.app\` dosyasını Application
 Apple Developer ID ile imzalanmış ve notarize edilmiştir.
 
 ### Bu sürümde
-- **Yeni:** System Data hedefleri — loglar, uygulama cache'leri, çöp kutusu, iOS yedekleri, Time Machine snapshot'ları
-- **Yeni:** Documents/build temizliği — eski node_modules, Next.js cache, Flutter engine cache, proje build çıktıları
-- **Yeni:** İsteğe bağlı — eski iOS Pods, Android emulator snapshot'ları, Gradle wrapper indirmeleri
-- En son kullanılan proje otomatik korunur
+- **İyileştirme:** DMG içindeki **CleanMac'i Kur.app** artık CleanMac roket ikonunu kullanıyor
 
 ### Destek
 
