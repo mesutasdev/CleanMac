@@ -40,7 +40,7 @@ actor UpdateService {
     static let shared = UpdateService()
 
     private let repo = "mesutasdev/CleanMac"
-    private let installerAppName = "CleanMac'i Kur.app"
+    private let installerAppNames = ["Install CleanMac.app", "CleanMac'i Kur.app"]
     private let appName = "CleanMac.app"
 
     func fetchLatestUpdate() async throws -> AvailableUpdate? {
@@ -95,11 +95,12 @@ actor UpdateService {
         progress(L("update.preparing"))
         let mountPoint = try mountImage(at: destination)
 
-        let installerURL = mountPoint.appendingPathComponent(installerAppName, isDirectory: true)
         let appURL = mountPoint.appendingPathComponent(appName, isDirectory: true)
 
         let launchURL: URL
-        if FileManager.default.fileExists(atPath: installerURL.path) {
+        if let installerURL = installerAppNames
+            .map({ mountPoint.appendingPathComponent($0, isDirectory: true) })
+            .first(where: { FileManager.default.fileExists(atPath: $0.path) }) {
             launchURL = installerURL
         } else if FileManager.default.fileExists(atPath: appURL.path) {
             progress(L("update.copying"))

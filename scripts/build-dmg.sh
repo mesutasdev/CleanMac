@@ -57,74 +57,23 @@ ln -sf /Applications "$DMG_STAGING/Applications"
 
 if [[ "${USE_DEVELOPER_ID:-0}" -eq 1 ]]; then
   "$ROOT/scripts/create-installer-app.sh" "$DMG_STAGING" "$RESIGN_IDENTITY"
-  cat > "$DMG_STAGING/KURULUM.txt" <<'EOF'
-CleanMac — Kurulum / Installation
-
-İki yoldan birini seçin / Choose either method:
-
-══════════════════════════════════════
-TÜRKÇE
-══════════════════════════════════════
-
-YOL 1 — Çift tıkla, kur, otomatik aç
-  1) "CleanMac'i Kur.app" dosyasına çift tıklayın
-  2) Uygulama Applications'a kurulur ve CleanMac otomatik açılır
-
-YOL 2 — Sürükle bırak
-  1) CleanMac açıksa menü çubuğundan çıkın
-  2) CleanMac.app dosyasını Applications klasörüne sürükleyin
-  3) Applications'dan CleanMac'i açın
-
-══════════════════════════════════════
-ENGLISH
-══════════════════════════════════════
-
-METHOD 1 — Double-click to install and open
-  1) Double-click "CleanMac'i Kur.app"
-  2) CleanMac is installed to Applications and opens automatically
-
-METHOD 2 — Drag and drop
-  1) If CleanMac is running, quit from the menu bar
-  2) Drag CleanMac.app into the Applications folder
-  3) Open CleanMac from Applications
-EOF
+  cp "$ROOT/scripts/dmg-install-instructions.txt" "$DMG_STAGING/INSTALL.txt"
+  cp "$ROOT/scripts/dmg-install-instructions.txt" "$DMG_STAGING/KURULUM.txt"
 elif [[ "$RESIGN_IDENTITY" != "Developer ID Application" ]]; then
   cp "$CA_CRT" "$DMG_STAGING/CleanMac-Root-CA.crt"
-  cat > "$DMG_STAGING/KURULUM.txt" <<'EOF'
-CleanMac — Kurulum / Installation
+  cat > "$DMG_STAGING/INSTALL.txt" <<'EOF'
+CleanMac — Install / Kurulum (Developer build)
 
-İki yoldan birini seçin / Choose either method:
+① Drag & drop · Sürükle bırak
+   Drag CleanMac.app → Applications  ·  CleanMac.app → Applications
 
-══════════════════════════════════════
-TÜRKÇE
-══════════════════════════════════════
-
-YOL 1 — Sürükle bırak
-  1) CleanMac.app dosyasını Applications klasörüne sürükleyin
-  2) Applications'dan CleanMac'i açın
-
-YOL 2 — İlk açılış uyarısı (geliştirici imzası)
-  macOS uyarı verirse:
-  - CleanMac-Root-CA.crt dosyasını çift tıklayın
-  - Anahtar Zinciri Erişimi > Sistem > CleanMac Root CA
-  - Güven > Kod imzalama için: Her Zaman Güven
-  - CleanMac.app için Sağ tık > Aç > Aç
-
-══════════════════════════════════════
-ENGLISH
-══════════════════════════════════════
-
-METHOD 1 — Drag and drop
-  1) Drag CleanMac.app into the Applications folder
-  2) Open CleanMac from Applications
-
-METHOD 2 — First launch warning (developer signature)
-  If macOS warns:
-  - Double-click CleanMac-Root-CA.crt
-  - Keychain Access > System > CleanMac Root CA
-  - Trust > When using this certificate: Always Trust
-  - Right-click CleanMac.app > Open > Open
+② First launch / İlk açılış (if macOS warns · macOS uyarı verirse)
+   Double-click CleanMac-Root-CA.crt  ·  CleanMac-Root-CA.crt dosyasına çift tıklayın
+   Keychain Access > System > CleanMac Root CA > Always Trust
+   ·  Anahtar Zinciri > Sistem > CleanMac Root CA > Her Zaman Güven
+   Right-click CleanMac.app > Open  ·  CleanMac.app > Sağ tık > Aç
 EOF
+  cp "$DMG_STAGING/INSTALL.txt" "$DMG_STAGING/KURULUM.txt"
 fi
 
 hdiutil create -volname "$APP_NAME" -srcfolder "$DMG_STAGING" -ov -format UDZO "$DMG_OUTPUT"
@@ -144,13 +93,13 @@ if [[ "${USE_DEVELOPER_ID:-0}" -eq 1 ]]; then
       hdiutil detach "$VERIFY_MOUNT" -quiet 2>/dev/null || true
       exit 1
     fi
-    if ! spctl -a -t exec -- "$VERIFY_MOUNT/CleanMac'i Kur.app" >/dev/null 2>&1; then
-      echo "HATA: CleanMac'i Kur.app Gatekeeper doğrulaması başarısız" >&2
+    if ! spctl -a -t exec -- "$VERIFY_MOUNT/Install CleanMac.app" >/dev/null 2>&1; then
+      echo "HATA: Install CleanMac.app Gatekeeper doğrulaması başarısız" >&2
       hdiutil detach "$VERIFY_MOUNT" -quiet 2>/dev/null || true
       exit 1
     fi
     hdiutil detach "$VERIFY_MOUNT" -quiet
-    echo ">> Gatekeeper doğrulandı (CleanMac.app + CleanMac'i Kur.app)"
+    echo ">> Gatekeeper doğrulandı (CleanMac.app + Install CleanMac.app)"
   fi
 fi
 
