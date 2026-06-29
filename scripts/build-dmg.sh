@@ -58,28 +58,72 @@ ln -sf /Applications "$DMG_STAGING/Applications"
 if [[ "${USE_DEVELOPER_ID:-0}" -eq 1 ]]; then
   "$ROOT/scripts/create-installer-app.sh" "$DMG_STAGING" "$RESIGN_IDENTITY"
   cat > "$DMG_STAGING/KURULUM.txt" <<'EOF'
-CleanMac kurulumu
+CleanMac — Kurulum / Installation
 
-ÖNERİLEN:
+İki yoldan birini seçin / Choose either method:
+
+══════════════════════════════════════
+TÜRKÇE
+══════════════════════════════════════
+
+YOL 1 — Çift tıkla, kur, otomatik aç
   1) "CleanMac'i Kur.app" dosyasına çift tıklayın
-  2) Kurulum bitince CleanMac otomatik açılır
+  2) Uygulama Applications'a kurulur ve CleanMac otomatik açılır
 
-Manuel:
-  1) CleanMac açıksa menü çubuğu → CleanMac'den Çık
-  2) CleanMac.app → Applications klasörüne sürükleyin
-  3) Uygulamayı açın
+YOL 2 — Sürükle bırak
+  1) CleanMac açıksa menü çubuğundan çıkın
+  2) CleanMac.app dosyasını Applications klasörüne sürükleyin
+  3) Applications'dan CleanMac'i açın
+
+══════════════════════════════════════
+ENGLISH
+══════════════════════════════════════
+
+METHOD 1 — Double-click to install and open
+  1) Double-click "CleanMac'i Kur.app"
+  2) CleanMac is installed to Applications and opens automatically
+
+METHOD 2 — Drag and drop
+  1) If CleanMac is running, quit from the menu bar
+  2) Drag CleanMac.app into the Applications folder
+  3) Open CleanMac from Applications
 EOF
 elif [[ "$RESIGN_IDENTITY" != "Developer ID Application" ]]; then
   cp "$CA_CRT" "$DMG_STAGING/CleanMac-Root-CA.crt"
   cat > "$DMG_STAGING/KURULUM.txt" <<'EOF'
-CleanMac kurulumu
+CleanMac — Kurulum / Installation
 
-1) CleanMac.app dosyasını Applications klasörüne sürükleyin.
-2) İlk açılışta macOS uyarı verirse:
-   - CleanMac-Root-CA.crt dosyasını çift tıklayın
-   - Anahtar Zinciri Erişimi > Sistem > CleanMac Root CA
-   - Güven > Kod imzalama için: Her Zaman Güven
-   - CleanMac.app için Sağ tık > Aç > Aç
+İki yoldan birini seçin / Choose either method:
+
+══════════════════════════════════════
+TÜRKÇE
+══════════════════════════════════════
+
+YOL 1 — Sürükle bırak
+  1) CleanMac.app dosyasını Applications klasörüne sürükleyin
+  2) Applications'dan CleanMac'i açın
+
+YOL 2 — İlk açılış uyarısı (geliştirici imzası)
+  macOS uyarı verirse:
+  - CleanMac-Root-CA.crt dosyasını çift tıklayın
+  - Anahtar Zinciri Erişimi > Sistem > CleanMac Root CA
+  - Güven > Kod imzalama için: Her Zaman Güven
+  - CleanMac.app için Sağ tık > Aç > Aç
+
+══════════════════════════════════════
+ENGLISH
+══════════════════════════════════════
+
+METHOD 1 — Drag and drop
+  1) Drag CleanMac.app into the Applications folder
+  2) Open CleanMac from Applications
+
+METHOD 2 — First launch warning (developer signature)
+  If macOS warns:
+  - Double-click CleanMac-Root-CA.crt
+  - Keychain Access > System > CleanMac Root CA
+  - Trust > When using this certificate: Always Trust
+  - Right-click CleanMac.app > Open > Open
 EOF
 fi
 
