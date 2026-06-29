@@ -22,6 +22,7 @@ struct DetailView: View {
             .opacity(viewModel.isScanning && !viewModel.hasScanned ? 0.55 : 1)
 
             detailContent
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             StatusBarView(
@@ -84,22 +85,22 @@ private struct OverviewDetailContent: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
+                sectionHeader(L("detail.disk_space"))
+
+                DiskUsageCard(
+                    diskSpace: viewModel.diskSpace,
+                    selectedBytes: viewModel.selectedTotalBytes,
+                    permanentBytes: viewModel.permanentReclaimBytes
+                )
+                .padding(.horizontal, 16)
+                .padding(.bottom, 12)
+                .onAppear {
+                    viewModel.refreshDiskSpace()
+                }
+
                 if viewModel.isScanning && !viewModel.hasScanned {
-                    scanningPlaceholder
+                    ScanningTargetsCard()
                 } else {
-                    sectionHeader(L("detail.disk_space"))
-
-                    DiskUsageCard(
-                        diskSpace: viewModel.diskSpace,
-                        selectedBytes: viewModel.selectedTotalBytes,
-                        permanentBytes: viewModel.permanentReclaimBytes
-                    )
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 12)
-                    .onAppear {
-                        viewModel.refreshDiskSpace()
-                    }
-
                     ForEach(viewModel.visibleCategories(), id: \.self) { category in
                         TargetCategorySection(
                             category: category,
@@ -134,24 +135,11 @@ private struct OverviewDetailContent: View {
                     }
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.bottom, 12)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(nsColor: .controlBackgroundColor))
-    }
-
-    private var scanningPlaceholder: some View {
-        HStack(spacing: 12) {
-            ProgressView()
-                .controlSize(.regular)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(L("detail.scanning_title"))
-                    .font(.body)
-                Text(L("detail.scanning_subtitle"))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .padding(16)
     }
 }
 
@@ -165,11 +153,7 @@ private struct CategoryDetailContent: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 if viewModel.isScanning && !viewModel.hasScanned {
-                    HStack(spacing: 12) {
-                        ProgressView()
-                        Text(L("detail.scanning_title"))
-                    }
-                    .padding(16)
+                    ScanningTargetsCard()
                 } else {
                     TargetCategorySection(
                         category: category,
@@ -183,9 +167,40 @@ private struct CategoryDetailContent: View {
                     )
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.bottom, 12)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(nsColor: .controlBackgroundColor))
+    }
+}
+
+private struct ScanningTargetsCard: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            sectionHeader(L("sidebar.categories"))
+
+            HStack(alignment: .center, spacing: 12) {
+                ProgressView()
+                    .controlSize(.regular)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(L("detail.scanning_title"))
+                        .font(.body)
+                    Text(L("detail.scanning_subtitle"))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer(minLength: 0)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(16)
+            .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .padding(.horizontal, 16)
+            .padding(.bottom, 12)
+        }
     }
 }
 
@@ -226,6 +241,7 @@ private struct TargetCategorySection: View {
                 .padding(.top, 4)
                 .padding(.bottom, 12)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

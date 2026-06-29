@@ -30,9 +30,8 @@ Kurulum uygulamasının adı macOS sistem diline göre gösterilir.
 Apple Developer ID ile imzalanmış ve notarize edilmiştir.
 
 ### Bu sürümde
-- **Düzeltme:** "Önerilenleri Seç/Kaldır" tıklanınca kategori görünümünde başlık ve satırların kayması
-- **Düzeltme:** NavigationSplitView yerine sabit iki sütunlu düzen — macOS layout bug'ı giderildi
-- **İyileştirme:** Seçim state'i ayrıldı; checkbox'lar daha stabil
+- **Düzeltme:** İlk tarama ekranında ("Önbellekler taranıyor…") içeriğin dar dikey şerit olarak görünmesi
+- **İyileştirme:** Tarama başlarken disk alanı kartı hemen gösteriliyor
 
 ### Destek
 
