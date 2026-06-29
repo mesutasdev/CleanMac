@@ -1,10 +1,9 @@
 import Foundation
 
-struct CleanTarget: Identifiable, Sendable {
+struct CleanTarget: Identifiable, Sendable, Equatable {
     let kind: CleanTargetKind
     var sizeBytes: Int64
     var exists: Bool
-    var isSelected: Bool
     var detail: String?
     var locationPaths: [String] = []
 
@@ -25,7 +24,6 @@ struct CleanTarget: Identifiable, Sendable {
                 kind: kind,
                 sizeBytes: 0,
                 exists: false,
-                isSelected: kind.defaultSelected,
                 detail: nil
             )
         }

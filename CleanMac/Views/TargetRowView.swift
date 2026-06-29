@@ -1,25 +1,26 @@
 import AppKit
 import SwiftUI
 
-struct TargetRowView: View {
+struct TargetRowView: View, Equatable {
     let target: CleanTarget
     let isSelected: Bool
     let isInteractionLocked: Bool
     let onSelectionChange: (Bool) -> Void
 
+    static func == (lhs: TargetRowView, rhs: TargetRowView) -> Bool {
+        lhs.target == rhs.target
+            && lhs.isSelected == rhs.isSelected
+            && lhs.isInteractionLocked == rhs.isInteractionLocked
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top, spacing: 12) {
-                Toggle(
-                    isOn: Binding(
-                        get: { isSelected },
-                        set: { onSelectionChange($0) }
-                    )
-                ) {
-                    EmptyView()
-                }
-                .toggleStyle(.checkbox)
-                .disabled(target.sizeBytes == 0 || isInteractionLocked)
+                SelectionCheckbox(
+                    isSelected: isSelected,
+                    isEnabled: target.sizeBytes > 0 && !isInteractionLocked,
+                    onToggle: { onSelectionChange(!isSelected) }
+                )
                 .padding(.top, 4)
 
                 Image(systemName: target.icon)
@@ -92,8 +93,6 @@ struct TargetRowView: View {
         }
         .opacity(target.sizeBytes > 0 ? 1 : 0.5)
         .padding(.vertical, 6)
-        .listRowInsets(EdgeInsets(top: 8, leading: 4, bottom: 8, trailing: 12))
-        .id(target.id)
     }
 
     private var iconTint: Color {
@@ -122,6 +121,25 @@ struct TargetRowView: View {
             return note
         }
         return "—"
+    }
+}
+
+private struct SelectionCheckbox: View {
+    let isSelected: Bool
+    let isEnabled: Bool
+    let onToggle: () -> Void
+
+    var body: some View {
+        Button(action: onToggle) {
+            Image(systemName: isSelected ? "checkmark.square.fill" : "square")
+                .font(.title3)
+                .foregroundStyle(isEnabled ? (isSelected ? Color.accentColor : Color.secondary) : Color.secondary.opacity(0.35))
+                .frame(width: 20, height: 20)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(!isEnabled)
+        .help(isSelected ? L("detail.deselect_recommended") : L("detail.select_recommended"))
     }
 }
 

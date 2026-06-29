@@ -7,35 +7,39 @@ struct SidebarView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            Text(L("app.name"))
+                .font(.headline)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
+                .padding(.top, 14)
+                .padding(.bottom, 8)
+
             SidebarSummaryCard(
                 permanentBytes: viewModel.permanentReclaimBytes,
                 temporaryBytes: viewModel.temporaryReclaimBytes,
                 isScanning: viewModel.isScanning
             )
             .padding(.horizontal, 8)
-            .padding(.top, 8)
             .padding(.bottom, 4)
 
             List(selection: $viewModel.sidebarSelection) {
                 Section(L("sidebar.categories")) {
-                    NavigationLink(value: SidebarSelection.overview) {
-                        SidebarCategoryLabel(
-                            title: L("sidebar.overview"),
-                            systemImage: "square.grid.2x2",
-                            byteTotal: viewModel.selectedTotalBytes,
-                            tint: .accentColor
-                        )
-                    }
+                    sidebarRow(
+                        selection: .overview,
+                        title: L("sidebar.overview"),
+                        systemImage: "square.grid.2x2",
+                        byteTotal: viewModel.selectedTotalBytes,
+                        tint: .accentColor
+                    )
 
                     ForEach(viewModel.visibleCategories(), id: \.self) { category in
-                        NavigationLink(value: SidebarSelection.category(category)) {
-                            SidebarCategoryLabel(
-                                title: category.sidebarTitle,
-                                systemImage: category.systemImage,
-                                byteTotal: viewModel.selectedBytes(in: category),
-                                tint: tint(for: category)
-                            )
-                        }
+                        sidebarRow(
+                            selection: .category(category),
+                            title: category.sidebarTitle,
+                            systemImage: category.systemImage,
+                            byteTotal: viewModel.selectedBytes(in: category),
+                            tint: tint(for: category)
+                        )
                     }
                 }
             }
@@ -72,7 +76,24 @@ struct SidebarView: View {
             .background(.bar)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .navigationTitle(L("app.name"))
+        .background(Color(nsColor: .windowBackgroundColor))
+    }
+
+    @ViewBuilder
+    private func sidebarRow(
+        selection: SidebarSelection,
+        title: String,
+        systemImage: String,
+        byteTotal: Int64,
+        tint: Color
+    ) -> some View {
+        SidebarCategoryLabel(
+            title: title,
+            systemImage: systemImage,
+            byteTotal: byteTotal,
+            tint: tint
+        )
+        .tag(selection)
     }
 
     private func tint(for category: CleanTargetCategory) -> Color {

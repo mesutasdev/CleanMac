@@ -12,7 +12,7 @@ enum DiskCleaner {
         let home = FileManager.default.homeDirectoryForCurrentUser
         var results: [CleanResult] = []
 
-        for target in targets where target.isSelected && target.sizeBytes > 0 {
+        for target in targets where target.sizeBytes > 0 {
             let result: CleanResult
             switch target.kind {
             case .xcodeDerivedData:
@@ -132,7 +132,7 @@ enum DiskCleaner {
         for path in paths {
             let sizeBefore = DerivedDataHelper.directorySize(at: path)
             let result = cleanDirectory(
-                target: CleanTarget(kind: target.kind, sizeBytes: sizeBefore, exists: true, isSelected: true),
+                target: CleanTarget(kind: target.kind, sizeBytes: sizeBefore, exists: true),
                 path: path
             )
             if result.success {

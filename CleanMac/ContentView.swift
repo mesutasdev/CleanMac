@@ -5,18 +5,20 @@ struct ContentView: View {
     @ObservedObject var updateManager: UpdateManager
     @ObservedObject var languageManager: LanguageManager
     @ObservedObject var appearanceManager: AppearanceManager
-    @State private var columnVisibility: NavigationSplitViewVisibility = .all
 
     var body: some View {
-        NavigationSplitView(columnVisibility: $columnVisibility) {
+        HStack(spacing: 0) {
             SidebarView(
                 viewModel: viewModel,
                 languageManager: languageManager,
                 appearanceManager: appearanceManager
             )
-                .navigationSplitViewColumnWidth(min: 280, ideal: 300, max: 360)
-        } detail: {
+            .frame(width: 300)
+
+            Divider()
+
             DetailView(viewModel: viewModel)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(minWidth: 900, minHeight: 640)
         .updateAlerts(updateManager: updateManager)

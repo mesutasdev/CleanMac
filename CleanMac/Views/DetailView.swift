@@ -5,6 +5,12 @@ struct DetailView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            DetailTitleBar(
+                title: viewModel.detailTitle,
+                isInteractionLocked: viewModel.isInteractionLocked,
+                onRefresh: { Task { await viewModel.scan() } }
+            )
+
             SelectionActionsBar(
                 selectedBytes: viewModel.selectedTotalBytes,
                 isRecommendedSelectionActive: viewModel.isRecommendedSelectionActive,
@@ -15,64 +21,8 @@ struct DetailView: View {
             )
             .opacity(viewModel.isScanning && !viewModel.hasScanned ? 0.55 : 1)
 
-            List {
-                if viewModel.sidebarSelection == .overview {
-                    Section {
-                        DiskUsageCard(
-                            diskSpace: viewModel.diskSpace,
-                            selectedBytes: viewModel.selectedTotalBytes,
-                            permanentBytes: viewModel.permanentReclaimBytes
-                        )
-                        .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 8, trailing: 16))
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                    } header: {
-                        Text(L("detail.disk_space"))
-                    }
-                    .onAppear {
-                        viewModel.refreshDiskSpace()
-                    }
-                }
-
-                if viewModel.isScanning && !viewModel.hasScanned {
-                    Section {
-                        HStack(spacing: 12) {
-                            ProgressView()
-                                .controlSize(.regular)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(L("detail.scanning_title"))
-                                    .font(.body)
-                                Text(L("detail.scanning_subtitle"))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                        .padding(.vertical, 8)
-                    }
-                } else {
-                    targetSections
-
-                    if !viewModel.showRegeneratingCaches && viewModel.sidebarSelection == .overview {
-                        Section {
-                            Button {
-                                viewModel.showRegeneratingCaches = true
-                            } label: {
-                                Label(L("detail.show_advanced_caches"), systemImage: "gearshape")
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .contentShape(Rectangle())
-                            }
-
-                            SectionCaptionRow(
-                                text: L("detail.advanced_caches_footer")
-                            )
-                        }
-                    }
-                }
-            }
-            .listStyle(.inset(alternatesRowBackgrounds: true))
+            detailContent
         }
-        .navigationTitle(viewModel.detailTitle)
-        .toolbar { detailToolbar }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             StatusBarView(
                 message: viewModel.statusMessage,
@@ -85,67 +35,214 @@ struct DetailView: View {
     }
 
     @ViewBuilder
-    private var targetSections: some View {
+    private var detailContent: some View {
         switch viewModel.sidebarSelection {
         case .overview:
-            ForEach(viewModel.visibleCategories(), id: \.self) { category in
-                targetSection(for: category, showHeader: true)
-            }
+            OverviewDetailContent(viewModel: viewModel)
         case .category(let category):
-            targetSection(for: category, showHeader: false)
-        }
-    }
-
-    @ViewBuilder
-    private func targetSection(for category: CleanTargetCategory, showHeader: Bool) -> some View {
-        if showHeader {
-            Section {
-                targetRows(for: category)
-                SectionCaptionRow(text: category.sectionFooter)
-            } header: {
-                Label {
-                    Text(category.sectionTitle)
-                        .multilineTextAlignment(.leading)
-                        .fixedSize(horizontal: false, vertical: true)
-                } icon: {
-                    Image(systemName: category.systemImage)
-                }
-            }
-        } else {
-            Section {
-                targetRows(for: category)
-                SectionCaptionRow(text: category.sectionFooter)
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func targetRows(for category: CleanTargetCategory) -> some View {
-        ForEach(viewModel.targets(in: category)) { target in
-            TargetRowView(
-                target: target,
-                isSelected: target.isSelected,
-                isInteractionLocked: viewModel.isInteractionLocked,
-                onSelectionChange: { selected in
-                    viewModel.setSelected(id: target.id, selected: selected)
-                }
+            CategoryDetailContent(
+                viewModel: viewModel,
+                category: category,
+                targets: viewModel.targets(in: category),
+                selectedIDs: viewModel.selectedTargetIDs
             )
         }
     }
+}
 
-    @ToolbarContentBuilder
-    private var detailToolbar: some ToolbarContent {
-        ToolbarItemGroup(placement: .primaryAction) {
-            Button {
-                Task { await viewModel.scan() }
-            } label: {
+private struct DetailTitleBar: View {
+    let title: String
+    let isInteractionLocked: Bool
+    let onRefresh: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Text(title)
+                .font(.title2.weight(.semibold))
+                .lineLimit(1)
+
+            Spacer()
+
+            Button(action: onRefresh) {
                 Label(L("menu.refresh"), systemImage: "arrow.clockwise")
             }
             .labelStyle(.titleAndIcon)
             .help(L("detail.refresh_help"))
-            .disabled(viewModel.isInteractionLocked)
+            .disabled(isInteractionLocked)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .frame(height: 52)
+        .background(.bar)
+        .overlay(alignment: .bottom) { Divider() }
+    }
+}
+
+private struct OverviewDetailContent: View {
+    @ObservedObject var viewModel: CleanMacViewModel
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                if viewModel.isScanning && !viewModel.hasScanned {
+                    scanningPlaceholder
+                } else {
+                    sectionHeader(L("detail.disk_space"))
+
+                    DiskUsageCard(
+                        diskSpace: viewModel.diskSpace,
+                        selectedBytes: viewModel.selectedTotalBytes,
+                        permanentBytes: viewModel.permanentReclaimBytes
+                    )
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 12)
+                    .onAppear {
+                        viewModel.refreshDiskSpace()
+                    }
+
+                    ForEach(viewModel.visibleCategories(), id: \.self) { category in
+                        TargetCategorySection(
+                            category: category,
+                            targets: viewModel.targets(in: category),
+                            selectedIDs: viewModel.selectedTargetIDs,
+                            isInteractionLocked: viewModel.isInteractionLocked,
+                            showHeader: true,
+                            onSelectionChange: { id, selected in
+                                viewModel.setSelected(id: id, selected: selected)
+                            }
+                        )
+                    }
+
+                    if !viewModel.showRegeneratingCaches {
+                        Button {
+                            viewModel.showRegeneratingCaches = true
+                        } label: {
+                            Label(L("detail.show_advanced_caches"), systemImage: "gearshape")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+
+                        Text(L("detail.advanced_caches_footer"))
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 12)
+                    }
+                }
+            }
+            .padding(.bottom, 12)
+        }
+        .background(Color(nsColor: .controlBackgroundColor))
+    }
+
+    private var scanningPlaceholder: some View {
+        HStack(spacing: 12) {
+            ProgressView()
+                .controlSize(.regular)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(L("detail.scanning_title"))
+                    .font(.body)
+                Text(L("detail.scanning_subtitle"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(16)
+    }
+}
+
+private struct CategoryDetailContent: View {
+    @ObservedObject var viewModel: CleanMacViewModel
+    let category: CleanTargetCategory
+    let targets: [CleanTarget]
+    let selectedIDs: Set<String>
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                if viewModel.isScanning && !viewModel.hasScanned {
+                    HStack(spacing: 12) {
+                        ProgressView()
+                        Text(L("detail.scanning_title"))
+                    }
+                    .padding(16)
+                } else {
+                    TargetCategorySection(
+                        category: category,
+                        targets: targets,
+                        selectedIDs: selectedIDs,
+                        isInteractionLocked: viewModel.isInteractionLocked,
+                        showHeader: false,
+                        onSelectionChange: { id, selected in
+                            viewModel.setSelected(id: id, selected: selected)
+                        }
+                    )
+                }
+            }
+            .padding(.bottom, 12)
+        }
+        .background(Color(nsColor: .controlBackgroundColor))
+    }
+}
+
+private struct TargetCategorySection: View {
+    let category: CleanTargetCategory
+    let targets: [CleanTarget]
+    let selectedIDs: Set<String>
+    let isInteractionLocked: Bool
+    let showHeader: Bool
+    let onSelectionChange: (String, Bool) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if showHeader {
+                sectionHeader(category.sectionTitle, systemImage: category.systemImage)
+            }
+
+            ForEach(Array(targets.enumerated()), id: \.element.id) { index, target in
+                TargetRowView(
+                    target: target,
+                    isSelected: selectedIDs.contains(target.id),
+                    isInteractionLocked: isInteractionLocked,
+                    onSelectionChange: { selected in
+                        onSelectionChange(target.id, selected)
+                    }
+                )
+                .equatable()
+                .padding(.horizontal, 12)
+                .padding(.vertical, 4)
+                .background(index.isMultiple(of: 2) ? Color.clear : Color.primary.opacity(0.03))
+            }
+
+            Text(category.sectionFooter)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
+                .padding(.top, 4)
+                .padding(.bottom, 12)
         }
     }
+}
+
+private func sectionHeader(_ title: String, systemImage: String? = nil) -> some View {
+    HStack(spacing: 8) {
+        if let systemImage {
+            Image(systemName: systemImage)
+                .foregroundStyle(.secondary)
+        }
+        Text(title)
+            .font(.headline)
+            .foregroundStyle(.secondary)
+        Spacer()
+    }
+    .padding(.horizontal, 16)
+    .padding(.top, 16)
+    .padding(.bottom, 8)
 }
 
 private struct SelectionActionsBar: View {
@@ -159,27 +256,47 @@ private struct SelectionActionsBar: View {
     var body: some View {
         HStack(spacing: 10) {
             Button(action: onToggleRecommended) {
-                Label(
-                    isRecommendedSelectionActive ? L("detail.deselect_recommended") : L("detail.select_recommended"),
-                    systemImage: isRecommendedSelectionActive ? "checkmark.circle.fill" : "checkmark.circle"
-                )
+                Label {
+                    Text(
+                        isRecommendedSelectionActive
+                            ? L("detail.deselect_recommended")
+                            : L("detail.select_recommended")
+                    )
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+                } icon: {
+                    Image(
+                        systemName: isRecommendedSelectionActive
+                            ? "checkmark.circle.fill"
+                            : "checkmark.circle"
+                    )
+                }
             }
             .buttonStyle(.bordered)
             .disabled(isSelectionDisabled)
+            .frame(minWidth: 168, alignment: .leading)
+            .layoutPriority(1)
 
             Spacer(minLength: 12)
 
             Button(action: onClean) {
-                Label(cleanButtonTitle, systemImage: "trash")
+                Label {
+                    Text(cleanButtonTitle)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
+                } icon: {
+                    Image(systemName: "trash")
+                }
             }
             .buttonStyle(.borderedProminent)
             .tint(.green)
             .disabled(isCleanDisabled)
             .help(L("detail.free_space_help"))
+            .frame(minWidth: 140, alignment: .trailing)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .frame(minHeight: 52, maxHeight: 52)
+        .frame(height: 52)
         .background(.regularMaterial)
         .overlay(alignment: .bottom) { Divider() }
     }
@@ -189,22 +306,6 @@ private struct SelectionActionsBar: View {
             return "\(L("detail.free_space")) · \(ByteCountFormatter.string(from: selectedBytes))"
         }
         return L("detail.free_space")
-    }
-}
-
-private struct SectionCaptionRow: View {
-    let text: String
-
-    var body: some View {
-        Text(text)
-            .font(.footnote)
-            .foregroundStyle(.secondary)
-            .multilineTextAlignment(.leading)
-            .fixedSize(horizontal: false, vertical: true)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
-            .listRowInsets(EdgeInsets(top: 2, leading: 16, bottom: 10, trailing: 16))
     }
 }
 

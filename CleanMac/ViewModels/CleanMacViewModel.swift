@@ -10,6 +10,7 @@ final class CleanMacViewModel: ObservableObject {
     }
 
     @Published var targets: [CleanTarget] = CleanTarget.makeDefaults()
+    @Published private(set) var selectedTargetIDs: Set<String> = []
     @Published var isScanning = false
     @Published var isCleaning = false
     @Published var statusMessage: String?
@@ -27,20 +28,23 @@ final class CleanMacViewModel: ObservableObject {
         isScanning || isCleaning
     }
 
-    var selectedTotalBytes: Int64 {
-        targets.filter(\.isSelected).reduce(0) { $0 + $1.sizeBytes }
+    func isSelected(_ id: String) -> Bool {
+        selectedTargetIDs.contains(id)
     }
 
-    /// Geri gelmeyen, gerçekten boşalan alan.
+    var selectedTotalBytes: Int64 {
+        targets.filter { isSelected($0.id) }.reduce(0) { $0 + $1.sizeBytes }
+    }
+
     var permanentReclaimBytes: Int64 {
         targets
-            .filter { $0.isSelected && $0.category != .regenerating && $0.sizeBytes > 0 }
+            .filter { isSelected($0.id) && $0.category != .regenerating && $0.sizeBytes > 0 }
             .reduce(0) { $0 + $1.sizeBytes }
     }
 
     var temporaryReclaimBytes: Int64 {
         targets
-            .filter { $0.isSelected && $0.category == .regenerating && $0.sizeBytes > 0 }
+            .filter { isSelected($0.id) && $0.category == .regenerating && $0.sizeBytes > 0 }
             .reduce(0) { $0 + $1.sizeBytes }
     }
 
@@ -49,29 +53,27 @@ final class CleanMacViewModel: ObservableObject {
     }
 
     var hasActiveSelection: Bool {
-        targets.contains { $0.isSelected && $0.sizeBytes > 0 }
+        targets.contains { isSelected($0.id) && $0.sizeBytes > 0 }
     }
 
     var includesLastBuildDeletion: Bool {
         targets.contains {
             ($0.kind == .xcodeDerivedDataLastBuild || $0.kind == .flutterLastBuild)
-            && $0.isSelected
+            && isSelected($0.id)
             && $0.sizeBytes > 0
         }
     }
 
     var includesRegeneratingSelection: Bool {
-        targets.contains { $0.category == .regenerating && $0.isSelected && $0.sizeBytes > 0 }
+        targets.contains { $0.category == .regenerating && isSelected($0.id) && $0.sizeBytes > 0 }
     }
 
     var isRecommendedSelectionActive: Bool {
-        let hasRecommended = targets.contains { $0.category == .reclaimable && $0.sizeBytes > 0 }
-        guard hasRecommended else { return false }
-
-        return targets.allSatisfy { target in
-            let shouldSelect = target.category == .reclaimable && target.sizeBytes > 0
-            return target.isSelected == shouldSelect
-        }
+        let recommended = targets.filter { $0.category == .reclaimable && $0.sizeBytes > 0 }
+        guard !recommended.isEmpty else { return false }
+        return recommended.allSatisfy { isSelected($0.id) }
+            && targets.filter { !($0.category == .reclaimable && $0.sizeBytes > 0) }
+                .allSatisfy { !isSelected($0.id) }
     }
 
     func targets(in category: CleanTargetCategory) -> [CleanTarget] {
@@ -84,7 +86,7 @@ final class CleanMacViewModel: ObservableObject {
 
     func selectedBytes(in category: CleanTargetCategory) -> Int64 {
         targets(in: category)
-            .filter(\.isSelected)
+            .filter { isSelected($0.id) }
             .reduce(0) { $0 + max(0, $1.sizeBytes) }
     }
 
@@ -140,19 +142,14 @@ final class CleanMacViewModel: ObservableObject {
         refreshDiskSpace()
 
         let wasFirstScan = !hasScanned
-        let previousSelection = Dictionary(uniqueKeysWithValues: targets.map { ($0.id, $0.isSelected) })
+        let previousSelection = selectedTargetIDs
         let scanned = await DiskScanner.scanAll()
 
-        replaceTargets(scanned.map { target in
-            var updated = target
-            if let selected = previousSelection[target.id] {
-                updated.isSelected = selected
-            }
-            if updated.sizeBytes == 0 {
-                updated.isSelected = false
-            }
-            return updated
-        })
+        targets = scanned
+
+        selectedTargetIDs = previousSelection.filter { id in
+            scanned.first(where: { $0.id == id })?.sizeBytes ?? 0 > 0
+        }
 
         isScanning = false
         if options.clearStatusMessage {
@@ -161,9 +158,8 @@ final class CleanMacViewModel: ObservableObject {
         refreshDiskSpace()
 
         if options.autoSelectRecommended {
-            let hadMeaningfulSelection = previousSelection.contains { id, selected in
-                guard selected else { return false }
-                return scanned.first(where: { $0.id == id })?.sizeBytes ?? 0 > 0
+            let hadMeaningfulSelection = previousSelection.contains { id in
+                scanned.first(where: { $0.id == id })?.sizeBytes ?? 0 > 0
             }
             if wasFirstScan || !hadMeaningfulSelection {
                 selectRecommended()
@@ -172,24 +168,27 @@ final class CleanMacViewModel: ObservableObject {
     }
 
     func toggleSelection(for target: CleanTarget) {
-        setSelected(id: target.id, selected: !target.isSelected)
+        setSelected(id: target.id, selected: !isSelected(target.id))
     }
 
     func setSelected(id: String, selected: Bool) {
         guard !isInteractionLocked else { return }
-        guard let index = targets.firstIndex(where: { $0.id == id }) else { return }
-        guard targets[index].isSelected != selected else { return }
-        guard targets[index].sizeBytes > 0 || !selected else { return }
+        guard let target = targets.first(where: { $0.id == id }) else { return }
+        guard target.sizeBytes > 0 || !selected else { return }
 
-        var updated = targets
-        updated[index].isSelected = selected
-        replaceTargets(updated)
+        if selected {
+            guard !selectedTargetIDs.contains(id) else { return }
+            selectedTargetIDs.insert(id)
+        } else {
+            guard selectedTargetIDs.contains(id) else { return }
+            selectedTargetIDs.remove(id)
+        }
     }
 
     var includesDestructiveDeletion: Bool {
         targets.contains {
             ($0.kind == .xcodeDerivedDataLastBuild || $0.kind == .flutterLastBuild || $0.kind == .xcodeDeviceSupportLatest)
-            && $0.isSelected
+            && isSelected($0.id)
             && $0.sizeBytes > 0
         }
     }
@@ -197,11 +196,11 @@ final class CleanMacViewModel: ObservableObject {
     func selectRecommended() {
         guard !isInteractionLocked else { return }
 
-        replaceTargets(targets.map { target in
-            var updated = target
-            updated.isSelected = target.category == .reclaimable && target.sizeBytes > 0
-            return updated
-        })
+        selectedTargetIDs = Set(
+            targets
+                .filter { $0.category == .reclaimable && $0.sizeBytes > 0 }
+                .map(\.id)
+        )
     }
 
     func toggleRecommendedSelection() {
@@ -217,20 +216,24 @@ final class CleanMacViewModel: ObservableObject {
     func selectAll(_ selected: Bool) {
         guard !isInteractionLocked else { return }
 
-        replaceTargets(targets.map { target in
-            var updated = target
-            if !selected {
-                updated.isSelected = false
-                return updated
-            }
+        if !selected {
+            selectedTargetIDs.removeAll()
+            return
+        }
 
-            let isHiddenRegenerating = target.category == .regenerating && !showRegeneratingCaches
-            let isProtectedDestructive = target.kind == .xcodeDerivedDataLastBuild
-                || target.kind == .flutterLastBuild
-                || target.kind == .xcodeDeviceSupportLatest
-            updated.isSelected = target.sizeBytes > 0 && !isHiddenRegenerating && !isProtectedDestructive
-            return updated
-        })
+        selectedTargetIDs = Set(
+            targets.filter { target in
+                guard target.sizeBytes > 0 else { return false }
+                if target.category == .regenerating && !showRegeneratingCaches { return false }
+                if target.kind == .xcodeDerivedDataLastBuild
+                    || target.kind == .flutterLastBuild
+                    || target.kind == .xcodeDeviceSupportLatest {
+                    return false
+                }
+                return true
+            }
+            .map(\.id)
+        )
     }
 
     func requestClean() {
@@ -248,7 +251,7 @@ final class CleanMacViewModel: ObservableObject {
         statusMessage = L("scan.cleaning_status")
 
         let hadRegenerating = includesRegeneratingSelection
-        let toClean = targets.filter { $0.isSelected && $0.sizeBytes > 0 }
+        let toClean = targets.filter { isSelected($0.id) && $0.sizeBytes > 0 }
         let results = await DiskCleaner.clean(targets: toClean)
 
         let freed = results.filter(\.success).reduce(0) { $0 + $1.freedBytes }
@@ -284,14 +287,6 @@ final class CleanMacViewModel: ObservableObject {
             guard let self, self.shouldAutoClearStatus else { return }
             self.statusMessage = nil
             self.shouldAutoClearStatus = false
-        }
-    }
-
-    private func replaceTargets(_ newTargets: [CleanTarget]) {
-        var transaction = Transaction()
-        transaction.disablesAnimations = true
-        withTransaction(transaction) {
-            targets = newTargets
         }
     }
 }

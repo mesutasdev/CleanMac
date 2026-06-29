@@ -30,8 +30,9 @@ Kurulum uygulamasının adı macOS sistem diline göre gösterilir.
 Apple Developer ID ile imzalanmış ve notarize edilmiştir.
 
 ### Bu sürümde
-- **Düzeltme:** "Önerilenleri Seç/Kaldır" tıklanınca kategori görünümünde başlık ve satırların üst üste binmesi
-- **Düzeltme:** Seçim değişince gereksiz liste yeniden oluşturma kaldırıldı
+- **Düzeltme:** "Önerilenleri Seç/Kaldır" tıklanınca kategori görünümünde başlık ve satırların kayması
+- **Düzeltme:** NavigationSplitView yerine sabit iki sütunlu düzen — macOS layout bug'ı giderildi
+- **İyileştirme:** Seçim state'i ayrıldı; checkbox'lar daha stabil
 
 ### Destek
 
