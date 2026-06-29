@@ -30,8 +30,8 @@ Kurulum uygulamasının adı macOS sistem diline göre gösterilir.
 Apple Developer ID ile imzalanmış ve notarize edilmiştir.
 
 ### Bu sürümde
-- **Düzeltme:** Görünüm, dil, Hakkında ve diğer butonlarda tıklama alanı genişletildi
-- **İyileştirme:** Kurulum uygulaması adı sistem diline göre (CleanMac'i Kur / Install CleanMac)
+- **Düzeltme:** Uygulama içi güncelleme "Copying app…" ekranında takılma sorunu giderildi
+- **İyileştirme:** Güncelleme artık her zaman kurulum uygulaması üzerinden yapılıyor
 
 ### Destek
 

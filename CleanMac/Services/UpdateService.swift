@@ -40,6 +40,7 @@ actor UpdateService {
     static let shared = UpdateService()
 
     private let repo = "mesutasdev/CleanMac"
+    private let installerBundleID = "com.cleanmac.app.installer"
     private let installerAppNames = ["Install CleanMac.app", "CleanMac'i Kur.app"]
     private let appName = "CleanMac.app"
 
@@ -95,24 +96,13 @@ actor UpdateService {
         progress(L("update.preparing"))
         let mountPoint = try mountImage(at: destination)
 
-        let appURL = mountPoint.appendingPathComponent(appName, isDirectory: true)
-
-        let launchURL: URL
-        if let installerURL = installerAppNames
-            .map({ mountPoint.appendingPathComponent($0, isDirectory: true) })
-            .first(where: { FileManager.default.fileExists(atPath: $0.path) }) {
-            launchURL = installerURL
-        } else if FileManager.default.fileExists(atPath: appURL.path) {
-            progress(L("update.copying"))
-            try await installApplication(from: appURL)
-            return
-        } else {
+        guard let installerURL = await findInstallerApp(in: mountPoint) else {
             throw UpdateError.missingInstaller
         }
 
         progress(L("update.installing"))
         let opened = await MainActor.run {
-            NSWorkspace.shared.open(launchURL)
+            NSWorkspace.shared.open(installerURL)
         }
         guard opened else {
             throw UpdateError.missingInstaller
@@ -122,6 +112,52 @@ actor UpdateService {
         await MainActor.run {
             NSApplication.shared.terminate(nil)
         }
+    }
+
+    private func findInstallerApp(in mountPoint: URL) async -> URL? {
+        for attempt in 0..<6 {
+            if let installerURL = locateInstallerApp(in: mountPoint) {
+                return installerURL
+            }
+
+            guard attempt < 5 else { break }
+            try? await Task.sleep(nanoseconds: 200_000_000)
+        }
+
+        return nil
+    }
+
+    private func locateInstallerApp(in mountPoint: URL) -> URL? {
+        let fileManager = FileManager.default
+
+        for name in installerAppNames {
+            let url = mountPoint.appendingPathComponent(name, isDirectory: true)
+            if fileManager.fileExists(atPath: url.path) {
+                return url
+            }
+        }
+
+        guard let contents = try? fileManager.contentsOfDirectory(
+            at: mountPoint,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: [.skipsHiddenFiles]
+        ) else {
+            return nil
+        }
+
+        for url in contents where url.pathExtension == "app" {
+            guard url.lastPathComponent != appName else { continue }
+
+            if installerAppNames.contains(url.lastPathComponent) {
+                return url
+            }
+
+            if Bundle(url: url)?.bundleIdentifier == installerBundleID {
+                return url
+            }
+        }
+
+        return nil
     }
 
     private func mountImage(at url: URL) throws -> URL {
@@ -150,31 +186,12 @@ actor UpdateService {
             throw UpdateError.mountFailed
         }
 
-        for entity in entities {
-            if let mountPoint = entity["mount-point"] as? String {
-                return URL(fileURLWithPath: mountPoint, isDirectory: true)
-            }
+        let mountPoints = entities.compactMap { $0["mount-point"] as? String }.filter { !$0.isEmpty }
+        guard let mountPoint = mountPoints.last(where: { $0.hasPrefix("/Volumes/") }) ?? mountPoints.last else {
+            throw UpdateError.mountFailed
         }
 
-        throw UpdateError.mountFailed
-    }
-
-    @MainActor
-    private func installApplication(from source: URL) throws {
-        let target = URL(fileURLWithPath: "/Applications/CleanMac.app", isDirectory: true)
-        DistributedNotificationCenter.default().post(name: .cleanMacInstallQuit, object: nil)
-
-        try? FileManager.default.removeItem(at: target)
-        try FileManager.default.copyItem(at: source, to: target)
-
-        let xattr = Process()
-        xattr.executableURL = URL(fileURLWithPath: "/usr/bin/xattr")
-        xattr.arguments = ["-cr", target.path]
-        try? xattr.run()
-        xattr.waitUntilExit()
-
-        NSWorkspace.shared.open(target)
-        NSApplication.shared.terminate(nil)
+        return URL(fileURLWithPath: mountPoint, isDirectory: true)
     }
 }
 
